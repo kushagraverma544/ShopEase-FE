@@ -9,7 +9,8 @@ export const ROUTE_PATHS = {
   PRODUCT_DETAILS: '/products/:productId',
   CART: '/cart',
   WISHLIST: '/wishlist',
-  ORDERS: '/orders',
+  SETTINGS: '/settings',
+  ACCOUNT: '/account',
   LOGIN: '/login',
 };
 

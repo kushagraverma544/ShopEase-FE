@@ -1,4 +1,4 @@
-import { Heart, Home, LayoutGrid, ShoppingBag } from 'lucide-react';
+import { Home, LayoutGrid, Settings } from 'lucide-react';
 
 import { ROUTE_PATHS } from '../routes/routePaths';
 
@@ -10,7 +10,6 @@ export const SIDEBAR_TOP_NAV_ITEMS = [
 ];
 
 export const SIDEBAR_BOTTOM_NAV_ITEMS = [
-  { id: 'wishlist', label: 'Wishlist', icon: Heart, path: ROUTE_PATHS.WISHLIST },
-  { id: 'orders', label: 'My Orders', icon: ShoppingBag, path: ROUTE_PATHS.ORDERS },
+  { id: 'settings', label: 'Settings', icon: Settings, path: ROUTE_PATHS.SETTINGS },
 ];
 

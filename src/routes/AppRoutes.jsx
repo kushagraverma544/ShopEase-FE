@@ -3,12 +3,14 @@ import { Route, Routes } from 'react-router-dom';
 
 import { Loader } from '../components/common/Loader/Loader';
 import { MainLayout } from '../components/layout/MainLayout';
+import { PrivateRoute } from './PrivateRoute';
 import { ROUTE_PATHS } from './routePaths';
 
 const LandingPage = lazy(() => import('../pages/Landing/LandingPage'));
 const ProductListingPage = lazy(() => import('../pages/Products/ProductListingPage'));
 const ProductDetailPage = lazy(() => import('../pages/ProductDetail/ProductDetailPage'));
 const AuthPage = lazy(() => import('../pages/Auth/AuthPage'));
+const AccountPage = lazy(() => import('../pages/Account/AccountPage'));
 
 export function AppRoutes() {
   return (
@@ -20,6 +22,10 @@ export function AppRoutes() {
           <Route path={ROUTE_PATHS.HOME} element={<LandingPage />} />
           <Route path={ROUTE_PATHS.PRODUCTS} element={<ProductListingPage />} />
           <Route path={ROUTE_PATHS.PRODUCT_DETAILS} element={<ProductDetailPage />} />
+
+          <Route element={<PrivateRoute />}>
+            <Route path={ROUTE_PATHS.ACCOUNT} element={<AccountPage />} />
+          </Route>
         </Route>
       </Routes>
     </Suspense>

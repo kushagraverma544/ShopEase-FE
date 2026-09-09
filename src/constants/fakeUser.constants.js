@@ -1,0 +1,108 @@
+// Demo profile shown on the My Account page until real user data comes from
+// the auth/user-service backend. Keep this in one place so swapping it for
+// a live API response later only touches AccountPage's data source.
+export const FAKE_USER = {
+  name: 'Rohan Verma',
+  avatarQuery: 'young indian man business casual headshot',
+  memberSince: 'January 2023',
+
+  personal: {
+    fullName: 'Rohan Verma',
+    gender: 'Male',
+    dateOfBirth: '14 March 1996',
+    preferredLanguage: 'English',
+  },
+
+  contact: {
+    email: 'rohan.verma@example.com',
+    emailVerified: true,
+    phone: '+91 98765 43210',
+    phoneVerified: true,
+    alternatePhone: '+91 87654 32109',
+    otpLoginEnabled: true,
+  },
+
+  addresses: [
+    {
+      id: 'addr-home',
+      label: 'Home',
+      isDefault: true,
+      name: 'Rohan Verma',
+      line1: '402, Silver Oak Apartments',
+      line2: '12th Main Road, Indiranagar',
+      city: 'Bengaluru',
+      state: 'Karnataka',
+      pincode: '560038',
+      phone: '+91 98765 43210',
+    },
+    {
+      id: 'addr-work',
+      label: 'Work',
+      isDefault: false,
+      name: 'Rohan Verma',
+      line1: 'WeWork Galaxy, 3rd Floor',
+      line2: '43 Residency Road',
+      city: 'Bengaluru',
+      state: 'Karnataka',
+      pincode: '560025',
+      phone: '+91 98765 43210',
+    },
+    {
+      id: 'addr-parents',
+      label: 'Other',
+      isDefault: false,
+      name: 'Suresh Verma',
+      line1: '17, Green Park Colony',
+      line2: 'Near City Hospital',
+      city: 'Lucknow',
+      state: 'Uttar Pradesh',
+      pincode: '226001',
+      phone: '+91 91234 56780',
+    },
+    {
+      id: 'addr-inlaws',
+      label: 'Other',
+      isDefault: false,
+      name: 'Rohan Verma',
+      line1: 'C-12, Lakeview Residency',
+      line2: 'Baner Road',
+      city: 'Pune',
+      state: 'Maharashtra',
+      pincode: '411045',
+      phone: '+91 90876 54321',
+    },
+    {
+      id: 'addr-friend',
+      label: 'Other',
+      isDefault: false,
+      name: 'Rohan Verma',
+      line1: '9, Palm Meadows Villas',
+      line2: 'Whitefield Main Road',
+      city: 'Bengaluru',
+      state: 'Karnataka',
+      pincode: '560066',
+      phone: '+91 99887 76655',
+    },
+  ],
+
+  cards: [
+    {
+      id: 'card-visa',
+      network: 'Visa',
+      last4: '4242',
+      holder: 'ROHAN VERMA',
+      expiry: '08/27',
+      isDefault: true,
+      gradient: 'from-primary-600 to-primary-900',
+    },
+    {
+      id: 'card-mastercard',
+      network: 'Mastercard',
+      last4: '8199',
+      holder: 'ROHAN VERMA',
+      expiry: '11/26',
+      isDefault: false,
+      gradient: 'from-neutral-800 to-neutral-900',
+    },
+  ],
+};
