@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { NavLink } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 
 import { Loader } from '../../../components/common/Loader/Loader';
 import { getCategoryIcon } from '../../../constants/categoryIcons';
@@ -17,17 +17,15 @@ import { ROUTE_PATHS } from '../../../routes/routePaths';
 import { getCategories } from '../../../services/productService';
 import { cn } from '../../../utils/cn';
 
-function SidebarNavLink({ to, icon: Icon, label, expanded, onNavigate }) {
+function SidebarNavLink({ to, icon: Icon, label, expanded, onNavigate, active }) {
   return (
-    <NavLink
+    <Link
       to={to}
       onClick={onNavigate}
-      className={({ isActive }) =>
-        cn(
-          'mx-2 flex h-11 items-center gap-3 rounded-md px-3.5 text-sm font-medium text-neutral-600 hover:bg-primary-50 hover:text-primary-700 transition-colors duration-150',
-          isActive && 'bg-primary-50 text-primary-700',
-        )
-      }
+      className={cn(
+        'mx-2 flex h-11 items-center gap-3 rounded-md px-3.5 text-sm font-medium text-neutral-600 hover:bg-primary-50 hover:text-primary-700 transition-colors duration-150',
+        active && 'bg-primary-50 text-primary-700',
+      )}
     >
       <Icon className="h-5 w-5 shrink-0" strokeWidth={1.75} />
       <span
@@ -38,7 +36,7 @@ function SidebarNavLink({ to, icon: Icon, label, expanded, onNavigate }) {
       >
         {label}
       </span>
-    </NavLink>
+    </Link>
   );
 }
 
@@ -68,6 +66,15 @@ export function Sidebar() {
 
   const showExpandedLabel = expanded || mobileOpen;
   const closeMobileDrawer = () => dispatch(mobileDrawerClosed());
+
+  const location = useLocation();
+  const isProductsPath = location.pathname === ROUTE_PATHS.PRODUCTS;
+  const activeCategorySlug = new URLSearchParams(location.search).get('category');
+
+  function isTopItemActive(item) {
+    if (item.id === 'categories') return isProductsPath && !activeCategorySlug;
+    return location.pathname === item.path;
+  }
 
   return (
     <>
@@ -101,6 +108,7 @@ export function Sidebar() {
                 label={item.label}
                 expanded={showExpandedLabel}
                 onNavigate={closeMobileDrawer}
+                active={isTopItemActive(item)}
               />
             ))}
           </nav>
@@ -122,6 +130,7 @@ export function Sidebar() {
                 label={category.name}
                 expanded={showExpandedLabel}
                 onNavigate={closeMobileDrawer}
+                active={isProductsPath && activeCategorySlug === category.slug}
               />
             ))}
           </nav>
@@ -137,6 +146,7 @@ export function Sidebar() {
                 label={item.label}
                 expanded={showExpandedLabel}
                 onNavigate={closeMobileDrawer}
+                active={location.pathname === item.path}
               />
             ))}
           </nav>

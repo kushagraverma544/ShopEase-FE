@@ -12,7 +12,7 @@ export function IconButton({ icon: Icon, size = 'md', label, className, ...rest 
       type="button"
       aria-label={label}
       className={cn(
-        'inline-flex items-center justify-center rounded-full text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900 transition-colors duration-150',
+        'inline-flex items-center justify-center rounded-full text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900 transition-colors duration-150 disabled:pointer-events-none disabled:opacity-40',
         SIZE_CLASSES[size],
         className,
       )}

@@ -6,6 +6,7 @@ import { MainLayout } from '../components/layout/MainLayout';
 import { ROUTE_PATHS } from './routePaths';
 
 const LandingPage = lazy(() => import('../pages/Landing/LandingPage'));
+const ProductListingPage = lazy(() => import('../pages/Products/ProductListingPage'));
 
 export function AppRoutes() {
   return (
@@ -13,6 +14,7 @@ export function AppRoutes() {
       <Routes>
         <Route element={<MainLayout />}>
           <Route path={ROUTE_PATHS.HOME} element={<LandingPage />} />
+          <Route path={ROUTE_PATHS.PRODUCTS} element={<ProductListingPage />} />
         </Route>
       </Routes>
     </Suspense>
