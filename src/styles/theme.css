@@ -1,0 +1,94 @@
+/*
+  Single source of truth for design tokens.
+  Every color / spacing / font-size / radius / shadow used anywhere in the app
+  MUST come from here — never hardcode a hex value, px value, or inline style
+  in a component. Add new tokens here first, then consume them via Tailwind
+  utility classes (or the `var(--token)` / `(--token)` arbitrary-value syntax).
+*/
+
+@theme {
+  /* ---- Brand / primary (buttons, links, active nav) ---- */
+  --color-primary-50: #eef2ff;
+  --color-primary-100: #e0e7ff;
+  --color-primary-200: #c7d2fe;
+  --color-primary-300: #a5b4fc;
+  --color-primary-400: #818cf8;
+  --color-primary-500: #6366f1;
+  --color-primary-600: #4f46e5;
+  --color-primary-700: #4338ca;
+  --color-primary-800: #3730a3;
+  --color-primary-900: #312e81;
+
+  /* ---- Accent (CTAs, deals, sale badges) ---- */
+  --color-accent-50: #fff7ed;
+  --color-accent-100: #ffedd5;
+  --color-accent-400: #fb923c;
+  --color-accent-500: #f97316;
+  --color-accent-600: #ea580c;
+  --color-accent-700: #c2410c;
+
+  /* ---- Neutral (text, borders, surfaces) ---- */
+  --color-neutral-0: #ffffff;
+  --color-neutral-50: #f9fafb;
+  --color-neutral-100: #f3f4f6;
+  --color-neutral-200: #e5e7eb;
+  --color-neutral-300: #d1d5db;
+  --color-neutral-400: #9ca3af;
+  --color-neutral-500: #6b7280;
+  --color-neutral-600: #4b5563;
+  --color-neutral-700: #374151;
+  --color-neutral-800: #1f2937;
+  --color-neutral-900: #111827;
+
+  /* ---- Semantic ---- */
+  --color-success-50: #f0fdf4;
+  --color-success-500: #22c55e;
+  --color-success-600: #16a34a;
+  --color-warning-50: #fffbeb;
+  --color-warning-500: #f59e0b;
+  --color-warning-600: #d97706;
+  --color-danger-50: #fef2f2;
+  --color-danger-500: #ef4444;
+  --color-danger-600: #dc2626;
+
+  /* ---- Typography ---- */
+  --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --text-2xs: 0.625rem;
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+  --text-4xl: 2.25rem;
+
+  /* ---- Radius ---- */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-full: 9999px;
+
+  /* ---- Shadows ---- */
+  --shadow-card: 0 1px 3px rgba(17, 24, 39, 0.08), 0 1px 2px rgba(17, 24, 39, 0.04);
+  --shadow-elevated: 0 10px 15px -3px rgba(17, 24, 39, 0.1), 0 4px 6px -4px rgba(17, 24, 39, 0.1);
+  --shadow-drawer: 4px 0 24px rgba(17, 24, 39, 0.12);
+}
+
+/*
+  Layout-only tokens: don't need generated color/spacing utilities, just
+  need to exist as CSS variables so components can reference them via the
+  `(--token)` arbitrary-value syntax (e.g. `w-(--sidebar-width-collapsed)`).
+*/
+:root {
+  --header-height: 4rem;
+  --sidebar-width-collapsed: 4.5rem;
+  --sidebar-width-expanded: 16rem;
+  --sidebar-transition-duration: 200ms;
+  --sidebar-transition-ease: ease;
+
+  --z-header: 40;
+  --z-sidebar: 30;
+  --z-drawer-backdrop: 20;
+}

@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install *)",
+      "Bash(npm run *)",
+      "Bash(curl -sf http://localhost:5173)",
+      "Bash(break)",
+      "Read(//private/tmp/**)",
+      "Bash(lsof -ti:5173 -sTCP:LISTEN)",
+      "Bash(lsof -ti:5174 -sTCP:LISTEN)",
+      "Bash(curl -s http://localhost:5174)",
+      "Bash(command -v chromium-cli)",
+      "Bash(node -e \"require.resolve\\('playwright'\\)\")",
+      "Bash(npm ls *)",
+      "Bash(npx --no-install playwright --version)"
+    ]
+  }
+}
