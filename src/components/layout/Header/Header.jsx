@@ -1,17 +1,16 @@
 import { Menu, Search, ShoppingCart, User } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 
+import logo from '../../../assets/logo.png';
 import { Button } from '../../../components/common/Button/Button';
 import { IconButton } from '../../../components/common/IconButton/IconButton';
 import { Input } from '../../../components/common/Input/Input';
-import { HEADER_NAV_LINKS } from '../../../constants/nav.constants';
 import { selectCurrentUser } from '../../../features/auth/authSlice';
 import { selectCartItemCount } from '../../../features/cart/cartSlice';
 import { mobileDrawerToggled } from '../../../features/ui/uiSlice';
 import { useAppDispatch } from '../../../hooks/useAppDispatch';
 import { useAppSelector } from '../../../hooks/useAppSelector';
 import { ROUTE_PATHS } from '../../../routes/routePaths';
-import { cn } from '../../../utils/cn';
 
 export function Header() {
   const dispatch = useAppDispatch();
@@ -27,26 +26,9 @@ export function Header() {
         onClick={() => dispatch(mobileDrawerToggled())}
       />
 
-      <NavLink to={ROUTE_PATHS.HOME} className="text-xl font-semibold text-primary-600 shrink-0">
-        ShopEase
+      <NavLink to={ROUTE_PATHS.HOME} className="shrink-0">
+        <img src={logo} alt="ShopEase" className="h-[3.75rem] w-auto" />
       </NavLink>
-
-      <nav className="hidden md:flex items-center gap-1">
-        {HEADER_NAV_LINKS.map((link) => (
-          <NavLink
-            key={link.id}
-            to={link.path}
-            className={({ isActive }) =>
-              cn(
-                'rounded-md px-3 py-2 text-sm font-medium text-neutral-600 hover:text-primary-600 transition-colors duration-150',
-                isActive && 'text-primary-600',
-              )
-            }
-          >
-            {link.label}
-          </NavLink>
-        ))}
-      </nav>
 
       <div className="ml-auto flex flex-1 items-center justify-end gap-2 md:gap-4">
         <div className="hidden sm:block max-w-sm flex-1">

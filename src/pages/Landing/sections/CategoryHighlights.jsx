@@ -4,19 +4,16 @@ import { NavLink } from 'react-router-dom';
 import { ErrorState } from '../../../components/common/ErrorState/ErrorState';
 import { Skeleton } from '../../../components/common/Skeleton/Skeleton';
 import { getCategoryIcon } from '../../../constants/categoryIcons';
+import { getCategoryImageQuery } from '../../../constants/categoryImageQueries';
 import { CATEGORY_HIGHLIGHTS_SKELETON_COUNT } from '../../../constants/product.constants';
 import { ROUTE_PATHS } from '../../../routes/routePaths';
 import { getCategories } from '../../../services/productService';
+import { getRandomPhoto } from '../../../services/unsplashService';
 
 const MAX_CATEGORIES = 6;
 
 function CategoryCardSkeleton() {
-  return (
-    <div className="flex flex-col items-center gap-2 rounded-lg border border-neutral-100 bg-neutral-0 px-3 py-5">
-      <Skeleton className="h-12 w-12 rounded-full" />
-      <Skeleton className="h-4 w-16" />
-    </div>
-  );
+  return <Skeleton className="h-48 w-full rounded-lg sm:h-56 md:h-64" />;
 }
 
 export function CategoryHighlights() {
@@ -31,8 +28,21 @@ export function CategoryHighlights() {
 
     getCategories()
       .then((data) => {
+        const shown = (data ?? []).slice(0, MAX_CATEGORIES);
+        // Each category's photo is fetched independently so one failed
+        // Unsplash call doesn't take down the whole section — it just falls
+        // back to that category's icon instead.
+        return Promise.all(
+          shown.map((category) =>
+            getRandomPhoto(getCategoryImageQuery(category.slug))
+              .then((photo) => ({ ...category, imageUrl: photo.urls.regular }))
+              .catch(() => ({ ...category, imageUrl: null })),
+          ),
+        );
+      })
+      .then((categoriesWithPhotos) => {
         if (!isMounted) return;
-        setCategories((data ?? []).slice(0, MAX_CATEGORIES));
+        setCategories(categoriesWithPhotos);
         setStatus('success');
       })
       .catch(() => {
@@ -57,23 +67,38 @@ export function CategoryHighlights() {
           onRetry={() => setRetryKey((key) => key + 1)}
         />
       ) : (
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-6">
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
           {status === 'loading'
             ? Array.from({ length: CATEGORY_HIGHLIGHTS_SKELETON_COUNT }).map((_, index) => (
                 <CategoryCardSkeleton key={index} />
               ))
-            : categories.map(({ slug, name }) => {
+            : categories.map(({ slug, name, imageUrl }) => {
                 const Icon = getCategoryIcon(slug);
                 return (
                   <NavLink
                     key={slug}
                     to={`${ROUTE_PATHS.PRODUCTS}?category=${slug}`}
-                    className="flex flex-col items-center gap-2 rounded-lg border border-neutral-100 bg-neutral-0 px-3 py-5 text-center shadow-card transition-colors duration-150 hover:border-primary-200 hover:bg-primary-50"
+                    className="group relative block h-48 w-full overflow-hidden rounded-lg shadow-card sm:h-56 md:h-64"
                   >
-                    <span className="flex h-12 w-12 items-center justify-center rounded-full bg-primary-50 text-primary-600">
-                      <Icon className="h-6 w-6" strokeWidth={1.75} />
-                    </span>
-                    <span className="text-sm font-medium text-neutral-700 capitalize">{name}</span>
+                    <div className="flex h-full w-full items-center justify-center overflow-hidden bg-primary-50">
+                      {imageUrl ? (
+                        <img
+                          src={imageUrl}
+                          alt=""
+                          className="h-full w-full object-cover transition-[filter] duration-300 group-hover:blur-sm"
+                        />
+                      ) : (
+                        <Icon className="h-12 w-12 text-primary-600" strokeWidth={1.5} />
+                      )}
+                    </div>
+
+                    <div className="absolute inset-0 bg-neutral-900/0 transition-colors duration-300 group-hover:bg-neutral-900/40" />
+
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+                      <span className="px-3 text-center text-lg font-semibold text-neutral-0 capitalize">
+                        {name}
+                      </span>
+                    </div>
                   </NavLink>
                 );
               })}

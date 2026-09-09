@@ -2,6 +2,7 @@ import { Lock, Mail, User } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 
+import logo from '../../assets/logo.png';
 import { Button } from '../../components/common/Button/Button';
 import { GoogleIcon } from '../../components/common/GoogleIcon/GoogleIcon';
 import { Input } from '../../components/common/Input/Input';
@@ -79,114 +80,116 @@ export function AuthPage() {
 
       <div className="flex w-full flex-col items-center justify-center px-6 py-12 md:w-1/2">
         <div className="w-full max-w-sm">
-          <NavLink to={ROUTE_PATHS.HOME} className="mb-8 block text-xl font-semibold text-primary-600">
-            ShopEase
+          <NavLink to={ROUTE_PATHS.HOME} className="mb-8 flex justify-center">
+            <img src={logo} alt="ShopEase" className="h-24 w-auto" />
           </NavLink>
 
-          <div className="mb-6 flex rounded-lg bg-neutral-100 p-1">
-            <button
-              type="button"
-              onClick={() => setMode('login')}
-              className={cn(
-                'flex-1 rounded-md py-2 text-sm font-medium transition-colors duration-150',
-                mode === 'login' ? 'bg-neutral-0 text-primary-600 shadow-card' : 'text-neutral-500',
-              )}
-            >
-              Login
-            </button>
-            <button
-              type="button"
-              onClick={() => setMode('register')}
-              className={cn(
-                'flex-1 rounded-md py-2 text-sm font-medium transition-colors duration-150',
-                mode === 'register' ? 'bg-neutral-0 text-primary-600 shadow-card' : 'text-neutral-500',
-              )}
-            >
-              Register
-            </button>
-          </div>
+          <div className="rounded-xl border border-neutral-200 bg-neutral-0 p-8 shadow-card">
+            <div className="mb-6 flex rounded-lg bg-neutral-100 p-1">
+              <button
+                type="button"
+                onClick={() => setMode('login')}
+                className={cn(
+                  'flex-1 rounded-md py-2 text-sm font-medium transition-colors duration-150',
+                  mode === 'login' ? 'bg-neutral-0 text-primary-600 shadow-card' : 'text-neutral-500',
+                )}
+              >
+                Login
+              </button>
+              <button
+                type="button"
+                onClick={() => setMode('register')}
+                className={cn(
+                  'flex-1 rounded-md py-2 text-sm font-medium transition-colors duration-150',
+                  mode === 'register' ? 'bg-neutral-0 text-primary-600 shadow-card' : 'text-neutral-500',
+                )}
+              >
+                Register
+              </button>
+            </div>
 
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-            {mode === 'register' ? (
+            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+              {mode === 'register' ? (
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-sm font-medium text-neutral-700" htmlFor="name">
+                    Full name
+                  </label>
+                  <Input
+                    id="name"
+                    icon={User}
+                    placeholder="Jane Doe"
+                    required
+                    value={name}
+                    onChange={(event) => setName(event.target.value)}
+                  />
+                </div>
+              ) : null}
+
               <div className="flex flex-col gap-1.5">
-                <label className="text-sm font-medium text-neutral-700" htmlFor="name">
-                  Full name
+                <label className="text-sm font-medium text-neutral-700" htmlFor="email">
+                  Email
                 </label>
                 <Input
-                  id="name"
-                  icon={User}
-                  placeholder="Jane Doe"
+                  id="email"
+                  type="email"
+                  icon={Mail}
+                  placeholder="you@example.com"
                   required
-                  value={name}
-                  onChange={(event) => setName(event.target.value)}
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
                 />
               </div>
-            ) : null}
 
-            <div className="flex flex-col gap-1.5">
-              <label className="text-sm font-medium text-neutral-700" htmlFor="email">
-                Email
-              </label>
-              <Input
-                id="email"
-                type="email"
-                icon={Mail}
-                placeholder="you@example.com"
-                required
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-              />
-            </div>
-
-            <div className="flex flex-col gap-1.5">
-              <div className="flex items-center justify-between">
-                <label className="text-sm font-medium text-neutral-700" htmlFor="password">
-                  Password
-                </label>
-                {mode === 'login' ? (
-                  <button type="button" className="text-xs font-medium text-primary-600 hover:underline">
-                    Forgot password?
-                  </button>
-                ) : null}
+              <div className="flex flex-col gap-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="text-sm font-medium text-neutral-700" htmlFor="password">
+                    Password
+                  </label>
+                  {mode === 'login' ? (
+                    <button type="button" className="text-xs font-medium text-primary-600 hover:underline">
+                      Forgot password?
+                    </button>
+                  ) : null}
+                </div>
+                <Input
+                  id="password"
+                  type="password"
+                  icon={Lock}
+                  placeholder="********"
+                  required
+                  minLength={6}
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                />
               </div>
-              <Input
-                id="password"
-                type="password"
-                icon={Lock}
-                placeholder="********"
-                required
-                minLength={6}
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-              />
+
+              <Button type="submit" size="lg" fullWidth className="mt-2">
+                {mode === 'login' ? 'Login' : 'Create account'}
+              </Button>
+            </form>
+
+            <div className="my-6 flex items-center gap-3">
+              <div className="h-px flex-1 bg-neutral-200" />
+              <span className="text-xs font-medium text-neutral-400">OR CONTINUE WITH</span>
+              <div className="h-px flex-1 bg-neutral-200" />
             </div>
 
-            <Button type="submit" size="lg" fullWidth className="mt-2">
-              {mode === 'login' ? 'Login' : 'Create account'}
+            <Button variant="secondary" size="lg" fullWidth onClick={handleGoogleContinue}>
+              <GoogleIcon className="h-5 w-5" />
+              Continue with Google
             </Button>
-          </form>
 
-          <div className="my-6 flex items-center gap-3">
-            <div className="h-px flex-1 bg-neutral-200" />
-            <span className="text-xs font-medium text-neutral-400">OR CONTINUE WITH</span>
-            <div className="h-px flex-1 bg-neutral-200" />
+            <p className="mt-6 text-center text-sm text-neutral-500">
+              {mode === 'login' ? "Don't have an account? " : 'Already have an account? '}
+              <button
+                type="button"
+                onClick={() => setMode(mode === 'login' ? 'register' : 'login')}
+                className="font-medium text-primary-600 hover:underline"
+              >
+                {mode === 'login' ? 'Register' : 'Login'}
+              </button>
+            </p>
           </div>
-
-          <Button variant="secondary" size="lg" fullWidth onClick={handleGoogleContinue}>
-            <GoogleIcon className="h-5 w-5" />
-            Continue with Google
-          </Button>
-
-          <p className="mt-6 text-center text-sm text-neutral-500">
-            {mode === 'login' ? "Don't have an account? " : 'Already have an account? '}
-            <button
-              type="button"
-              onClick={() => setMode(mode === 'login' ? 'register' : 'login')}
-              className="font-medium text-primary-600 hover:underline"
-            >
-              {mode === 'login' ? 'Register' : 'Login'}
-            </button>
-          </p>
         </div>
       </div>
     </div>

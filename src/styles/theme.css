@@ -82,7 +82,7 @@
   `(--token)` arbitrary-value syntax (e.g. `w-(--sidebar-width-collapsed)`).
 */
 :root {
-  --header-height: 4rem;
+  --header-height: 5rem;
   --sidebar-width-collapsed: 4.5rem;
   --sidebar-width-expanded: 16rem;
   --sidebar-transition-duration: 200ms;

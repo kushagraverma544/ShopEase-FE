@@ -14,8 +14,3 @@ export const SIDEBAR_BOTTOM_NAV_ITEMS = [
   { id: 'orders', label: 'My Orders', icon: ShoppingBag, path: ROUTE_PATHS.ORDERS },
 ];
 
-export const HEADER_NAV_LINKS = [
-  { id: 'home', label: 'Home', path: ROUTE_PATHS.HOME },
-  { id: 'products', label: 'Shop', path: ROUTE_PATHS.PRODUCTS },
-  { id: 'deals', label: 'Deals', path: ROUTE_PATHS.PRODUCTS },
-];
