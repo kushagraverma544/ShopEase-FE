@@ -1,7 +1,9 @@
+import { LocateFixed } from 'lucide-react';
 import { useState } from 'react';
 
 import { Button } from '../../../components/common/Button/Button';
 import { Input } from '../../../components/common/Input/Input';
+import { Loader } from '../../../components/common/Loader/Loader';
 
 const ADDRESS_LABELS = ['Home', 'Work', 'Other'];
 
@@ -19,6 +21,8 @@ const EMPTY_FORM = {
 
 export function AddressFormFields({ address, onCancel, onSave, submitLabel }) {
   const [form, setForm] = useState(address ? { ...EMPTY_FORM, ...address } : EMPTY_FORM);
+  const [isLocating, setIsLocating] = useState(false);
+  const [locationError, setLocationError] = useState(null);
 
   function updateField(field, value) {
     setForm((current) => ({ ...current, [field]: value }));
@@ -29,8 +33,64 @@ export function AddressFormFields({ address, onCancel, onSave, submitLabel }) {
     onSave({ ...form, id: address?.id ?? `addr-${Date.now()}` });
   }
 
+  function handleUseCurrentLocation() {
+    if (!navigator.geolocation) {
+      setLocationError('Geolocation is not supported by your browser.');
+      return;
+    }
+
+    setLocationError(null);
+    setIsLocating(true);
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          const { latitude, longitude } = position.coords;
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}`,
+          );
+          if (!response.ok) throw new Error('Reverse geocoding failed');
+
+          const data = await response.json();
+          const place = data.address ?? {};
+
+          setForm((current) => ({
+            ...current,
+            line1: [place.house_number, place.road].filter(Boolean).join(' ') || current.line1,
+            line2: place.suburb || place.neighbourhood || current.line2,
+            city: place.city || place.town || place.village || current.city,
+            state: place.state || current.state,
+            pincode: place.postcode || current.pincode,
+          }));
+        } catch {
+          setLocationError("Couldn't detect your address. Please enter it manually.");
+        } finally {
+          setIsLocating(false);
+        }
+      },
+      () => {
+        setLocationError('Location access denied. Please enter your address manually.');
+        setIsLocating(false);
+      },
+    );
+  }
+
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <div>
+        <Button
+          type="button"
+          variant="primary"
+          fullWidth
+          onClick={handleUseCurrentLocation}
+          disabled={isLocating}
+        >
+          {isLocating ? <Loader size="sm" /> : <LocateFixed className="h-4 w-4" strokeWidth={1.75} />}
+          {isLocating ? 'Detecting your location…' : 'Use my current location'}
+        </Button>
+        {locationError ? <p className="mt-2 text-xs text-danger-600">{locationError}</p> : null}
+      </div>
+
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="flex flex-col gap-1.5">
           <label className="text-sm font-medium text-neutral-700" htmlFor={`${address?.id ?? 'new'}-name`}>
@@ -142,7 +202,7 @@ export function AddressFormFields({ address, onCancel, onSave, submitLabel }) {
         Make this my default address
       </label>
 
-      <div className="flex gap-3">
+      <div className="flex justify-end gap-3">
         <Button type="submit">{submitLabel}</Button>
         <Button type="button" variant="secondary" onClick={onCancel}>
           Cancel

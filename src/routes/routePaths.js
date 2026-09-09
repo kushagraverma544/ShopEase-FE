@@ -11,6 +11,7 @@ export const ROUTE_PATHS = {
   WISHLIST: '/wishlist',
   SETTINGS: '/settings',
   ACCOUNT: '/account',
+  ORDERS: '/orders',
   LOGIN: '/login',
 };
 

@@ -37,10 +37,10 @@ export function Header() {
 
         {currentUser ? (
           <>
-            <IconButton as={NavLink} to={ROUTE_PATHS.WISHLIST} icon={Heart} label="Wishlist" />
+            <IconButton as={NavLink} to={ROUTE_PATHS.WISHLIST} icon={Heart} label="Wishlist" tooltip />
 
             <div className="relative">
-              <IconButton icon={ShoppingCart} label="Cart" />
+              <IconButton icon={ShoppingCart} label="My Cart" tooltip />
               {cartItemCount > 0 ? (
                 <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-accent-500 text-2xs font-semibold text-neutral-0">
                   {cartItemCount}
