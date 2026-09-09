@@ -1,16 +1,36 @@
-const MOCK_FEATURED_PRODUCTS = [
-  { id: 'p1', name: 'Wireless Headphones', price: 2499, rating: 4.5, category: 'Electronics' },
-  { id: 'p2', name: 'Running Sneakers', price: 3299, rating: 4.2, category: 'Fashion' },
-  { id: 'p3', name: 'Smart Watch', price: 5499, rating: 4.6, category: 'Accessories' },
-  { id: 'p4', name: 'Ceramic Dinner Set', price: 1899, rating: 4.3, category: 'Home & Living' },
-  { id: 'p5', name: 'Backpack', price: 1499, rating: 4.4, category: 'Fashion' },
-  { id: 'p6', name: 'Bluetooth Speaker', price: 1999, rating: 4.1, category: 'Electronics' },
-  { id: 'p7', name: 'Sunglasses', price: 999, rating: 4.0, category: 'Accessories' },
-  { id: 'p8', name: 'Table Lamp', price: 1299, rating: 4.5, category: 'Home & Living' },
-];
+import { ENDPOINTS } from './api/endpoints';
+import { httpClient } from './api/httpClient';
 
-// TODO: replace with `httpClient.get(ENDPOINTS.PRODUCTS.FEATURED)` once the
-// product-catalog service exposes this endpoint.
-export async function getFeaturedProducts() {
-  return MOCK_FEATURED_PRODUCTS;
+// Matches inventory-service's paginated shape:
+// { content, limit, offset, totalElements, totalPages }
+export async function getProducts({ limit = 30, offset = 0, sortBy, order } = {}) {
+  return httpClient.get(ENDPOINTS.PRODUCTS.LIST, {
+    params: { limit, offset, sortBy, order },
+  });
+}
+
+export async function getProductById(id) {
+  return httpClient.get(ENDPOINTS.PRODUCTS.DETAIL(id));
+}
+
+export async function searchProducts({ q, limit = 30, offset = 0 }) {
+  return httpClient.get(ENDPOINTS.PRODUCTS.SEARCH, {
+    params: { q, limit, offset },
+  });
+}
+
+export async function getProductsByCategory(category, { limit = 30, offset = 0 } = {}) {
+  return httpClient.get(ENDPOINTS.PRODUCTS.BY_CATEGORY(category), {
+    params: { limit, offset },
+  });
+}
+
+// [{ slug, name }]
+export async function getCategories() {
+  return httpClient.get(ENDPOINTS.PRODUCTS.CATEGORIES);
+}
+
+// ["beauty", "fragrances", ...]
+export async function getCategoryList() {
+  return httpClient.get(ENDPOINTS.PRODUCTS.CATEGORY_LIST);
 }
