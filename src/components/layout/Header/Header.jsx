@@ -5,6 +5,7 @@ import { Button } from '../../../components/common/Button/Button';
 import { IconButton } from '../../../components/common/IconButton/IconButton';
 import { Input } from '../../../components/common/Input/Input';
 import { HEADER_NAV_LINKS } from '../../../constants/nav.constants';
+import { selectCurrentUser } from '../../../features/auth/authSlice';
 import { selectCartItemCount } from '../../../features/cart/cartSlice';
 import { mobileDrawerToggled } from '../../../features/ui/uiSlice';
 import { useAppDispatch } from '../../../hooks/useAppDispatch';
@@ -15,6 +16,7 @@ import { cn } from '../../../utils/cn';
 export function Header() {
   const dispatch = useAppDispatch();
   const cartItemCount = useAppSelector(selectCartItemCount);
+  const currentUser = useAppSelector(selectCurrentUser);
 
   return (
     <header className="fixed inset-x-0 top-0 z-(--z-header) flex h-(--header-height) items-center gap-4 border-b border-neutral-100 bg-neutral-0 px-4 md:px-6">
@@ -62,7 +64,7 @@ export function Header() {
 
         <Button as={NavLink} to={ROUTE_PATHS.LOGIN} size="sm" variant="outline" className="hidden sm:inline-flex">
           <User className="h-4 w-4" strokeWidth={1.75} />
-          Account
+          {currentUser ? currentUser.name : 'Account'}
         </Button>
       </div>
     </header>

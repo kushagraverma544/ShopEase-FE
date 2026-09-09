@@ -3,6 +3,7 @@ import { FeaturedProducts } from './sections/FeaturedProducts';
 import { HeroSection } from './sections/HeroSection';
 import { Newsletter } from './sections/Newsletter';
 import { PromoBanner } from './sections/PromoBanner';
+import { SkylineBanner } from './sections/SkylineBanner';
 
 export function LandingPage() {
   return (
@@ -11,6 +12,7 @@ export function LandingPage() {
       <CategoryHighlights />
       <FeaturedProducts />
       <PromoBanner />
+      <SkylineBanner />
       <Newsletter />
     </>
   );

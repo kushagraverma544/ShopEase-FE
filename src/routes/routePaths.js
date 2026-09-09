@@ -12,3 +12,8 @@ export const ROUTE_PATHS = {
   ORDERS: '/orders',
   LOGIN: '/login',
 };
+
+// Builds a concrete link target for the PRODUCT_DETAILS route pattern.
+export function getProductDetailsPath(productId) {
+  return `/products/${productId}`;
+}

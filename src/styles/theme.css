@@ -91,4 +91,7 @@
   --z-header: 40;
   --z-sidebar: 30;
   --z-drawer-backdrop: 20;
+
+  --hero-height: 26rem;
+  --hero-transition-duration: 500ms;
 }

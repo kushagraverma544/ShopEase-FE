@@ -18,7 +18,10 @@
       "Bash(curl -s http://localhost:5174/src/pages/Landing/sections/FeaturedProducts.jsx)",
       "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:5174/)",
       "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:5174/products?category=beauty)",
-      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" \"http://localhost:5174/products?category=beauty\")"
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" \"http://localhost:5174/products?category=beauty\")",
+      "Bash(curl -s -m 3 \"http://localhost:8083/catalog/products/1\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" \"http://localhost:5174/products/1\")",
+      "Bash(lsof -ti:5173,5174,5175,5176 -sTCP:LISTEN)"
     ]
   }
 }

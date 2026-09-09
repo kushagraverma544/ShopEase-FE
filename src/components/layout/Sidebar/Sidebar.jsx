@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
-import { Loader } from '../../../components/common/Loader/Loader';
+import { Skeleton } from '../../../components/common/Skeleton/Skeleton';
 import { getCategoryIcon } from '../../../constants/categoryIcons';
 import { SIDEBAR_BOTTOM_NAV_ITEMS, SIDEBAR_TOP_NAV_ITEMS } from '../../../constants/nav.constants';
+import { SIDEBAR_CATEGORIES_SKELETON_COUNT } from '../../../constants/product.constants';
 import {
   mobileDrawerClosed,
   selectMobileDrawerOpen,
@@ -16,6 +17,15 @@ import { useAppSelector } from '../../../hooks/useAppSelector';
 import { ROUTE_PATHS } from '../../../routes/routePaths';
 import { getCategories } from '../../../services/productService';
 import { cn } from '../../../utils/cn';
+
+function SidebarItemSkeleton({ expanded }) {
+  return (
+    <div className="mx-2 flex h-11 items-center gap-3 px-3.5">
+      <Skeleton className="h-5 w-5 shrink-0 rounded-full" />
+      {expanded ? <Skeleton className="h-4 w-24" /> : null}
+    </div>
+  );
+}
 
 function SidebarNavLink({ to, icon: Icon, label, expanded, onNavigate, active }) {
   return (
@@ -116,11 +126,11 @@ export function Sidebar() {
           <div className="my-2 border-t border-neutral-100" />
 
           <nav className="flex flex-col gap-1">
-            {categoriesStatus === 'loading' ? (
-              <div className="flex justify-center py-3">
-                <Loader size="sm" />
-              </div>
-            ) : null}
+            {categoriesStatus === 'loading'
+              ? Array.from({ length: SIDEBAR_CATEGORIES_SKELETON_COUNT }).map((_, index) => (
+                  <SidebarItemSkeleton key={index} expanded={showExpandedLabel} />
+                ))
+              : null}
 
             {categories.map((category) => (
               <SidebarNavLink
