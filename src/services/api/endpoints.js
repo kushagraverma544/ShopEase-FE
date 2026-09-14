@@ -7,4 +7,8 @@ export const ENDPOINTS = {
     CATEGORY_LIST: '/catalog/products/category-list',
     BY_CATEGORY: (category) => `/catalog/products/category/${category}`,
   },
+  AUTH: {
+    LOGIN: '/auth/login',
+    LOGOUT: '/auth/logout',
+  },
 };

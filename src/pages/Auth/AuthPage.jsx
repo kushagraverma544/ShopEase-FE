@@ -10,6 +10,7 @@ import { AUTH_PAGE_CONTENT } from '../../constants/authPage.constants';
 import { userLoggedIn } from '../../features/auth/authSlice';
 import { useAppDispatch } from '../../hooks/useAppDispatch';
 import { ROUTE_PATHS } from '../../routes/routePaths';
+import { login } from '../../services/authService';
 import { getRandomPhoto } from '../../services/unsplashService';
 import { cn } from '../../utils/cn';
 
@@ -22,8 +23,11 @@ export function AuthPage() {
   const [imageStatus, setImageStatus] = useState('loading');
 
   const [name, setName] = useState('');
+  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -41,16 +45,53 @@ export function AuthPage() {
     };
   }, []);
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
-    // TODO: wire up to the real auth service once the backend contract exists.
-    dispatch(userLoggedIn({ name: name || email.split('@')[0], email }));
-    navigate(ROUTE_PATHS.HOME);
+    setError(null);
+
+    if (mode === 'register') {
+      // TODO: wire up to the real register endpoint once the backend contract exists.
+      dispatch(
+        userLoggedIn({
+          username: name || email.split('@')[0],
+          accessToken: null,
+          refreshToken: null,
+          expiresAt: null,
+        }),
+      );
+      navigate(ROUTE_PATHS.HOME);
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const data = await login({ username, password });
+      dispatch(
+        userLoggedIn({
+          username,
+          accessToken: data.accessToken,
+          refreshToken: data.refreshToken,
+          expiresAt: Date.now() + data.expiresIn * 1000,
+        }),
+      );
+      navigate(ROUTE_PATHS.HOME);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  function switchMode(nextMode) {
+    setMode(nextMode);
+    setError(null);
   }
 
   function handleGoogleContinue() {
     // TODO: real Google OAuth flow goes here once the backend supports it.
-    dispatch(userLoggedIn({ name: 'Google User', email: 'google-user@example.com' }));
+    dispatch(
+      userLoggedIn({ username: 'google-user', accessToken: null, refreshToken: null, expiresAt: null }),
+    );
     navigate(ROUTE_PATHS.HOME);
   }
 
@@ -88,7 +129,7 @@ export function AuthPage() {
             <div className="mb-6 flex rounded-lg bg-neutral-100 p-1">
               <button
                 type="button"
-                onClick={() => setMode('login')}
+                onClick={() => switchMode('login')}
                 className={cn(
                   'flex-1 rounded-md py-2 text-sm font-medium transition-colors duration-150',
                   mode === 'login' ? 'bg-neutral-0 text-primary-600 shadow-card' : 'text-neutral-500',
@@ -98,7 +139,7 @@ export function AuthPage() {
               </button>
               <button
                 type="button"
-                onClick={() => setMode('register')}
+                onClick={() => switchMode('register')}
                 className={cn(
                   'flex-1 rounded-md py-2 text-sm font-medium transition-colors duration-150',
                   mode === 'register' ? 'bg-neutral-0 text-primary-600 shadow-card' : 'text-neutral-500',
@@ -125,20 +166,36 @@ export function AuthPage() {
                 </div>
               ) : null}
 
-              <div className="flex flex-col gap-1.5">
-                <label className="text-sm font-medium text-neutral-700" htmlFor="email">
-                  Email
-                </label>
-                <Input
-                  id="email"
-                  type="email"
-                  icon={Mail}
-                  placeholder="you@example.com"
-                  required
-                  value={email}
-                  onChange={(event) => setEmail(event.target.value)}
-                />
-              </div>
+              {mode === 'login' ? (
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-sm font-medium text-neutral-700" htmlFor="username">
+                    Username
+                  </label>
+                  <Input
+                    id="username"
+                    icon={User}
+                    placeholder="test1"
+                    required
+                    value={username}
+                    onChange={(event) => setUsername(event.target.value)}
+                  />
+                </div>
+              ) : (
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-sm font-medium text-neutral-700" htmlFor="email">
+                    Email
+                  </label>
+                  <Input
+                    id="email"
+                    type="email"
+                    icon={Mail}
+                    placeholder="you@example.com"
+                    required
+                    value={email}
+                    onChange={(event) => setEmail(event.target.value)}
+                  />
+                </div>
+              )}
 
               <div className="flex flex-col gap-1.5">
                 <div className="flex items-center justify-between">
@@ -163,8 +220,10 @@ export function AuthPage() {
                 />
               </div>
 
-              <Button type="submit" size="lg" fullWidth className="mt-2">
-                {mode === 'login' ? 'Login' : 'Create account'}
+              {error ? <p className="text-sm text-danger-600">{error}</p> : null}
+
+              <Button type="submit" size="lg" fullWidth className="mt-2" disabled={submitting}>
+                {mode === 'login' ? (submitting ? 'Logging in…' : 'Login') : 'Create account'}
               </Button>
             </form>
 
@@ -183,7 +242,7 @@ export function AuthPage() {
               {mode === 'login' ? "Don't have an account? " : 'Already have an account? '}
               <button
                 type="button"
-                onClick={() => setMode(mode === 'login' ? 'register' : 'login')}
+                onClick={() => switchMode(mode === 'login' ? 'register' : 'login')}
                 className="font-medium text-primary-600 hover:underline"
               >
                 {mode === 'login' ? 'Register' : 'Login'}

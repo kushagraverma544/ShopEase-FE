@@ -21,6 +21,10 @@ export default defineConfig(({ command, mode }) => {
           target: 'http://localhost:8083',
           changeOrigin: true,
         },
+        '/auth': {
+          target: 'http://localhost:8081',
+          changeOrigin: true,
+        },
       },
     },
     build: {

@@ -1,18 +1,14 @@
 import { LogOut } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 import { Button } from '../../../components/common/Button/Button';
 import { Card } from '../../../components/common/Card/Card';
 import { Skeleton } from '../../../components/common/Skeleton/Skeleton';
-import { userLoggedOut } from '../../../features/auth/authSlice';
-import { useAppDispatch } from '../../../hooks/useAppDispatch';
-import { ROUTE_PATHS } from '../../../routes/routePaths';
+import { useLogout } from '../../../features/auth/useLogout';
 import { getRandomPhoto } from '../../../services/unsplashService';
 
 export function ProfileSidebar({ user }) {
-  const dispatch = useAppDispatch();
-  const navigate = useNavigate();
+  const handleLogout = useLogout();
   const [avatarUrl, setAvatarUrl] = useState(null);
 
   useEffect(() => {
@@ -26,11 +22,6 @@ export function ProfileSidebar({ user }) {
       isMounted = false;
     };
   }, [user.avatarQuery]);
-
-  function handleLogout() {
-    dispatch(userLoggedOut());
-    navigate(ROUTE_PATHS.HOME);
-  }
 
   return (
     <Card className="flex flex-col items-center gap-4 p-6 lg:sticky lg:top-[calc(var(--header-height)+1.5rem)]">

@@ -1,24 +1,17 @@
 import { LogOut, User } from 'lucide-react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 
 import { Button } from '../../../components/common/Button/Button';
 import { IconButton } from '../../../components/common/IconButton/IconButton';
-import { userLoggedOut } from '../../../features/auth/authSlice';
-import { useAppDispatch } from '../../../hooks/useAppDispatch';
+import { useLogout } from '../../../features/auth/useLogout';
 import { ROUTE_PATHS } from '../../../routes/routePaths';
 
 export function ProfileMenu({ currentUser }) {
-  const dispatch = useAppDispatch();
-  const navigate = useNavigate();
-
-  function handleLogout() {
-    dispatch(userLoggedOut());
-    navigate(ROUTE_PATHS.HOME);
-  }
+  const handleLogout = useLogout();
 
   return (
     <div className="group relative">
-      <IconButton icon={User} label={currentUser ? currentUser.name : 'Account'} />
+      <IconButton icon={User} label={currentUser ? currentUser.username : 'Account'} />
 
       <div className="hidden absolute right-0 top-full z-10 pt-2 group-hover:block group-focus-within:block">
         <div className="w-44 rounded-md border border-neutral-100 bg-neutral-0 p-2 shadow-drawer">
