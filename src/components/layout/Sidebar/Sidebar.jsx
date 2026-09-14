@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { RefreshCw } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
 import { Skeleton } from '../../../components/common/Skeleton/Skeleton';
@@ -24,6 +25,27 @@ function SidebarItemSkeleton({ expanded }) {
       <Skeleton className="h-5 w-5 shrink-0 rounded-full" />
       {expanded ? <Skeleton className="h-4 w-24" /> : null}
     </div>
+  );
+}
+
+function SidebarRetry({ expanded, onRetry }) {
+  return (
+    <button
+      type="button"
+      onClick={onRetry}
+      title="Retry loading categories"
+      className="mx-2 flex h-11 items-center gap-3 rounded-md px-3.5 text-sm font-medium text-danger-600 transition-colors duration-150 hover:bg-danger-50"
+    >
+      <RefreshCw className="h-5 w-5 shrink-0" strokeWidth={1.75} />
+      <span
+        className={cn(
+          'whitespace-nowrap transition-opacity duration-150',
+          expanded ? 'opacity-100' : 'opacity-0',
+        )}
+      >
+        Retry
+      </span>
+    </button>
   );
 }
 
@@ -56,23 +78,33 @@ export function Sidebar() {
   const mobileOpen = useAppSelector(selectMobileDrawerOpen);
   const [categories, setCategories] = useState([]);
   const [categoriesStatus, setCategoriesStatus] = useState('loading');
+  const isMountedRef = useRef(false);
 
-  useEffect(() => {
-    let isMounted = true;
+  const fetchCategories = useCallback(() => {
     getCategories()
       .then((data) => {
-        if (isMounted) {
+        if (isMountedRef.current) {
           setCategories(data ?? []);
           setCategoriesStatus('success');
         }
       })
       .catch(() => {
-        if (isMounted) setCategoriesStatus('error');
+        if (isMountedRef.current) setCategoriesStatus('error');
       });
-    return () => {
-      isMounted = false;
-    };
   }, []);
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    fetchCategories();
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, [fetchCategories]);
+
+  const retryCategories = useCallback(() => {
+    setCategoriesStatus('loading');
+    fetchCategories();
+  }, [fetchCategories]);
 
   const showExpandedLabel = expanded || mobileOpen;
   const closeMobileDrawer = () => dispatch(mobileDrawerClosed());
@@ -131,6 +163,10 @@ export function Sidebar() {
                   <SidebarItemSkeleton key={index} expanded={showExpandedLabel} />
                 ))
               : null}
+
+            {categoriesStatus === 'error' ? (
+              <SidebarRetry expanded={showExpandedLabel} onRetry={retryCategories} />
+            ) : null}
 
             {categories.map((category) => (
               <SidebarNavLink

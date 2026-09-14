@@ -11,5 +11,5 @@ export const SKYLINE_BANNER_CONTENT = {
   title: 'Skyline',
   description: 'Your gateway to the skies — book flights smarter, faster, and for less with Skyline.',
   ctaLabel: 'Book a Flight',
-  imageUrl: 'https://images.unsplash.com/photo-1664353655151-9d94a9170eb0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=1600&q=80',
+  imageUrl: 'https://images.unsplash.com/photo-1487253031786-9989fcd7bb73?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=1600&q=80',
 };
