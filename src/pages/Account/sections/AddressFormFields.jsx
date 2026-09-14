@@ -1,36 +1,56 @@
 import { LocateFixed } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { Button } from '../../../components/common/Button/Button';
 import { Input } from '../../../components/common/Input/Input';
 import { Loader } from '../../../components/common/Loader/Loader';
 
-const ADDRESS_LABELS = ['Home', 'Work', 'Other'];
+const ADDRESS_TYPES = [
+  { value: 'HOME', label: 'Home' },
+  { value: 'WORK', label: 'Work' },
+  { value: 'OTHER', label: 'Other' },
+];
 
 const EMPTY_FORM = {
-  label: 'Home',
-  name: '',
+  type: 'HOME',
+  recipientName: '',
   phone: '',
-  line1: '',
-  line2: '',
+  addressLine1: '',
+  addressLine2: '',
   city: '',
   state: '',
   pincode: '',
-  isDefault: false,
+  defaultAddress: false,
 };
 
 export function AddressFormFields({ address, onCancel, onSave, submitLabel }) {
-  const [form, setForm] = useState(address ? { ...EMPTY_FORM, ...address } : EMPTY_FORM);
+  const [form, setForm] = useState(
+    address ? { ...EMPTY_FORM, ...address, addressLine2: address.addressLine2 ?? '' } : EMPTY_FORM,
+  );
   const [isLocating, setIsLocating] = useState(false);
   const [locationError, setLocationError] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+  const isMountedRef = useRef(true);
+
+  useEffect(
+    () => () => {
+      isMountedRef.current = false;
+    },
+    [],
+  );
 
   function updateField(field, value) {
     setForm((current) => ({ ...current, [field]: value }));
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
-    onSave({ ...form, id: address?.id ?? `addr-${Date.now()}` });
+    setSubmitting(true);
+    // onSave (AddressesCard's handleAdd/handleEdit) reports its own outcome
+    // via a Banner and never rethrows — on failure it just leaves this form
+    // open so the user can fix and retry.
+    await onSave(form);
+    if (isMountedRef.current) setSubmitting(false);
   }
 
   function handleUseCurrentLocation() {
@@ -56,8 +76,8 @@ export function AddressFormFields({ address, onCancel, onSave, submitLabel }) {
 
           setForm((current) => ({
             ...current,
-            line1: [place.house_number, place.road].filter(Boolean).join(' ') || current.line1,
-            line2: place.suburb || place.neighbourhood || current.line2,
+            addressLine1: [place.house_number, place.road].filter(Boolean).join(' ') || current.addressLine1,
+            addressLine2: place.suburb || place.neighbourhood || current.addressLine2,
             city: place.city || place.town || place.village || current.city,
             state: place.state || current.state,
             pincode: place.postcode || current.pincode,
@@ -93,14 +113,14 @@ export function AddressFormFields({ address, onCancel, onSave, submitLabel }) {
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm font-medium text-neutral-700" htmlFor={`${address?.id ?? 'new'}-name`}>
+          <label className="text-sm font-medium text-neutral-700" htmlFor={`${address?.id ?? 'new'}-recipientName`}>
             Full Name
           </label>
           <Input
-            id={`${address?.id ?? 'new'}-name`}
+            id={`${address?.id ?? 'new'}-recipientName`}
             required
-            value={form.name}
-            onChange={(event) => updateField('name', event.target.value)}
+            value={form.recipientName}
+            onChange={(event) => updateField('recipientName', event.target.value)}
           />
         </div>
         <div className="flex flex-col gap-1.5">
@@ -118,25 +138,25 @@ export function AddressFormFields({ address, onCancel, onSave, submitLabel }) {
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label className="text-sm font-medium text-neutral-700" htmlFor={`${address?.id ?? 'new'}-line1`}>
+        <label className="text-sm font-medium text-neutral-700" htmlFor={`${address?.id ?? 'new'}-addressLine1`}>
           Address Line 1
         </label>
         <Input
-          id={`${address?.id ?? 'new'}-line1`}
+          id={`${address?.id ?? 'new'}-addressLine1`}
           required
-          value={form.line1}
-          onChange={(event) => updateField('line1', event.target.value)}
+          value={form.addressLine1}
+          onChange={(event) => updateField('addressLine1', event.target.value)}
         />
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label className="text-sm font-medium text-neutral-700" htmlFor={`${address?.id ?? 'new'}-line2`}>
+        <label className="text-sm font-medium text-neutral-700" htmlFor={`${address?.id ?? 'new'}-addressLine2`}>
           Address Line 2
         </label>
         <Input
-          id={`${address?.id ?? 'new'}-line2`}
-          value={form.line2}
-          onChange={(event) => updateField('line2', event.target.value)}
+          id={`${address?.id ?? 'new'}-addressLine2`}
+          value={form.addressLine2}
+          onChange={(event) => updateField('addressLine2', event.target.value)}
         />
       </div>
 
@@ -178,13 +198,13 @@ export function AddressFormFields({ address, onCancel, onSave, submitLabel }) {
 
       <div className="flex flex-wrap items-center gap-6">
         <span className="text-sm font-medium text-neutral-700">Address Type</span>
-        {ADDRESS_LABELS.map((label) => (
-          <label key={label} className="flex items-center gap-2 text-sm text-neutral-700">
+        {ADDRESS_TYPES.map(({ value, label }) => (
+          <label key={value} className="flex items-center gap-2 text-sm text-neutral-700">
             <input
               type="radio"
-              name={`address-label-${address?.id ?? 'new'}`}
-              checked={form.label === label}
-              onChange={() => updateField('label', label)}
+              name={`address-type-${address?.id ?? 'new'}`}
+              checked={form.type === value}
+              onChange={() => updateField('type', value)}
               className="h-4 w-4 border-neutral-300 text-primary-600 focus:ring-primary-500"
             />
             {label}
@@ -195,16 +215,18 @@ export function AddressFormFields({ address, onCancel, onSave, submitLabel }) {
       <label className="flex items-center gap-2 text-sm text-neutral-700">
         <input
           type="checkbox"
-          checked={form.isDefault}
-          onChange={(event) => updateField('isDefault', event.target.checked)}
+          checked={form.defaultAddress}
+          onChange={(event) => updateField('defaultAddress', event.target.checked)}
           className="h-4 w-4 rounded border-neutral-300 text-primary-600 focus:ring-primary-500"
         />
         Make this my default address
       </label>
 
       <div className="flex justify-end gap-3">
-        <Button type="submit">{submitLabel}</Button>
-        <Button type="button" variant="secondary" onClick={onCancel}>
+        <Button type="submit" disabled={submitting}>
+          {submitting ? 'Saving…' : submitLabel}
+        </Button>
+        <Button type="button" variant="secondary" onClick={onCancel} disabled={submitting}>
           Cancel
         </Button>
       </div>

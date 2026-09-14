@@ -1,21 +1,37 @@
 import { Heart, Menu, Search, ShoppingCart } from 'lucide-react';
+import { useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 
 import logo from '../../../assets/logo.png';
 import { IconButton } from '../../../components/common/IconButton/IconButton';
 import { Input } from '../../../components/common/Input/Input';
-import { selectCurrentUser } from '../../../features/auth/authSlice';
+import { selectCurrentUser, userProfileUpdated } from '../../../features/auth/authSlice';
 import { selectCartItemCount } from '../../../features/cart/cartSlice';
 import { mobileDrawerToggled } from '../../../features/ui/uiSlice';
 import { useAppDispatch } from '../../../hooks/useAppDispatch';
 import { useAppSelector } from '../../../hooks/useAppSelector';
 import { ROUTE_PATHS } from '../../../routes/routePaths';
+import { getMyDetails } from '../../../services/meService';
 import { ProfileMenu } from './ProfileMenu';
 
 export function Header() {
   const dispatch = useAppDispatch();
   const cartItemCount = useAppSelector(selectCartItemCount);
   const currentUser = useAppSelector(selectCurrentUser);
+
+  useEffect(() => {
+    if (!currentUser || currentUser.fullName) return undefined;
+
+    let isMounted = true;
+    getMyDetails()
+      .then((data) => {
+        if (isMounted) dispatch(userProfileUpdated({ fullName: data.fullName }));
+      })
+      .catch(() => {});
+    return () => {
+      isMounted = false;
+    };
+  }, [currentUser, dispatch]);
 
   return (
     <header className="fixed inset-x-0 top-0 z-(--z-header) flex h-(--header-height) items-center gap-4 border-b border-neutral-100 bg-neutral-0 px-4 md:px-6">

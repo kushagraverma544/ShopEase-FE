@@ -8,7 +8,6 @@ const initialState = {
   user: null,
   accessToken: null,
   refreshToken: null,
-  expiresAt: null,
 };
 
 const authSlice = createSlice({
@@ -16,19 +15,24 @@ const authSlice = createSlice({
   initialState,
   reducers: {
     userLoggedIn(state, action) {
-      const { username, accessToken, refreshToken, expiresAt } = action.payload;
-      state.user = { username };
+      const { username, accessToken, refreshToken } = action.payload;
+      state.user = { username, fullName: null };
       state.accessToken = accessToken;
       state.refreshToken = refreshToken;
-      state.expiresAt = expiresAt;
     },
     userLoggedOut() {
       return initialState;
     },
+    // /auth/login only returns tokens — fullName comes from GET /me, fetched
+    // separately (Header) or after an AccountPage edit, and synced in here
+    // so header display stays current without re-fetching everywhere.
+    userProfileUpdated(state, action) {
+      if (state.user) state.user.fullName = action.payload.fullName;
+    },
   },
 });
 
-export const { userLoggedIn, userLoggedOut } = authSlice.actions;
+export const { userLoggedIn, userLoggedOut, userProfileUpdated } = authSlice.actions;
 
 export const selectCurrentUser = (state) => state.auth.user;
 export const selectIsAuthenticated = (state) => Boolean(state.auth.user);

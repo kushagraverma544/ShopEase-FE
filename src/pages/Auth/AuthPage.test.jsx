@@ -46,7 +46,7 @@ describe('AuthPage login', () => {
     await userEvent.click(form.getByRole('button', { name: 'Login' }));
 
     await waitFor(() => {
-      expect(selectCurrentUser(store.getState())).toEqual({ username: 'test1' });
+      expect(selectCurrentUser(store.getState())).toEqual({ username: 'test1', fullName: null });
     });
 
     expect(authService.login).toHaveBeenCalledWith({ username: 'test1', password: 'password' });

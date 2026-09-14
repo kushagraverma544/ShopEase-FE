@@ -15,12 +15,7 @@ describe('attachAuthHeader', () => {
 
   it('attaches the access token as a Bearer header once logged in', () => {
     store.dispatch(
-      userLoggedIn({
-        username: 'test1',
-        accessToken: 'abc123',
-        refreshToken: 'refresh-456',
-        expiresAt: Date.now() + 300_000,
-      }),
+      userLoggedIn({ username: 'test1', accessToken: 'abc123', refreshToken: 'refresh-456' }),
     );
 
     const config = attachAuthHeader({ headers: {} });

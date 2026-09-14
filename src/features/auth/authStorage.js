@@ -1,15 +1,16 @@
 const STORAGE_KEY = 'shopease.auth';
 
-// Loads a persisted session on app boot, honoring the same 300s expiry the
-// backend enforces — an expired accessToken is dropped rather than restored,
-// since silent refresh isn't in scope yet (see auth API contract notes).
+// Loads a persisted session on app boot. No expiry check here — the app
+// only logs a user out when they click Logout, not on its own. A stale
+// accessToken just means the next protected API call 401s; that's handled
+// wherever that call happens, not by clearing the session on load.
 export function loadPersistedAuth() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
 
     const saved = JSON.parse(raw);
-    if (!saved.accessToken || !saved.expiresAt || saved.expiresAt <= Date.now()) {
+    if (!saved.accessToken) {
       localStorage.removeItem(STORAGE_KEY);
       return null;
     }

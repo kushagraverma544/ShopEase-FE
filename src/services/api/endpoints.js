@@ -11,4 +11,12 @@ export const ENDPOINTS = {
     LOGIN: '/auth/login',
     LOGOUT: '/auth/logout',
   },
+  ME: {
+    DETAILS: '/me',
+    PERSONAL_DETAILS: '/me/personal-details',
+    CONTACT_DETAILS: '/me/contact-details',
+    SECURITY: '/me/security',
+    ADDRESSES: '/me/addresses',
+    ADDRESS_DETAIL: (id) => `/me/addresses/${id}`,
+  },
 };

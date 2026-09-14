@@ -2,40 +2,29 @@ import { Briefcase, Home, MapPin, Pencil, Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 
 import { Badge } from '../../../components/common/Badge/Badge';
+import { Banner } from '../../../components/common/Banner/Banner';
 import { Button } from '../../../components/common/Button/Button';
 import { Card } from '../../../components/common/Card/Card';
 import { ConfirmDialog } from '../../../components/common/ConfirmDialog/ConfirmDialog';
 import { IconButton } from '../../../components/common/IconButton/IconButton';
-import { Loader } from '../../../components/common/Loader/Loader';
+import { createAddress, deleteAddress, listAddresses, updateAddress } from '../../../services/meService';
 import { AddressFormFields } from './AddressFormFields';
 
-const LABEL_ICONS = {
-  Home,
-  Work: Briefcase,
-};
+const TYPE_ICONS = { HOME: Home, WORK: Briefcase };
+const TYPE_LABELS = { HOME: 'Home', WORK: 'Work', OTHER: 'Other' };
 
 const PAGE_SIZE = 3;
 
 export function AddressesCard({ addresses, onAddressesChange }) {
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
-  const [isFetchingMore, setIsFetchingMore] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [banner, setBanner] = useState(null);
 
   const visibleAddresses = addresses.slice(0, visibleCount);
   const hasMore = visibleCount < addresses.length;
-
-  function handleShowMore() {
-    setIsFetchingMore(true);
-    // Addresses already live in memory, but a brief delay mirrors what
-    // fetching the next page from a real address-service call would feel
-    // like, instead of the list snapping in instantly.
-    setTimeout(() => {
-      setVisibleCount((count) => count + PAGE_SIZE);
-      setIsFetchingMore(false);
-    }, 400);
-  }
 
   function openAddForm() {
     setEditingId(null);
@@ -47,33 +36,45 @@ export function AddressesCard({ addresses, onAddressesChange }) {
     setEditingId(addressId);
   }
 
-  function handleAdd(address) {
-    onAddressesChange((current) => [
-      ...current.map((item) => (address.isDefault ? { ...item, isDefault: false } : item)),
-      address,
-    ]);
-    setIsAdding(false);
+  async function refresh() {
+    const list = await listAddresses();
+    onAddressesChange(list);
   }
 
-  function handleEdit(address) {
-    onAddressesChange((current) =>
-      current.map((item) =>
-        item.id === address.id ? address : { ...item, isDefault: address.isDefault ? false : item.isDefault },
-      ),
-    );
-    setEditingId(null);
+  async function handleAdd(form) {
+    try {
+      await createAddress(form);
+      await refresh();
+      setIsAdding(false);
+      setBanner({ variant: 'success', message: 'Address added.' });
+    } catch (err) {
+      setBanner({ variant: 'error', message: err.message });
+    }
   }
 
-  function handleDeleteConfirmed() {
-    onAddressesChange((current) => {
-      const remaining = current.filter((item) => item.id !== deletingId);
-      const removedWasDefault = current.find((item) => item.id === deletingId)?.isDefault;
-      if (removedWasDefault && remaining.length > 0 && !remaining.some((item) => item.isDefault)) {
-        remaining[0] = { ...remaining[0], isDefault: true };
-      }
-      return remaining;
-    });
-    setDeletingId(null);
+  async function handleEdit(form) {
+    try {
+      await updateAddress(form.id, form);
+      await refresh();
+      setEditingId(null);
+      setBanner({ variant: 'success', message: 'Address updated.' });
+    } catch (err) {
+      setBanner({ variant: 'error', message: err.message });
+    }
+  }
+
+  async function handleDeleteConfirmed() {
+    setIsDeleting(true);
+    try {
+      await deleteAddress(deletingId);
+      await refresh();
+      setDeletingId(null);
+      setBanner({ variant: 'success', message: 'Address deleted.' });
+    } catch (err) {
+      setBanner({ variant: 'error', message: err.message });
+    } finally {
+      setIsDeleting(false);
+    }
   }
 
   return (
@@ -91,6 +92,15 @@ export function AddressesCard({ addresses, onAddressesChange }) {
         ) : null}
       </div>
 
+      {banner ? (
+        <Banner
+          variant={banner.variant}
+          message={banner.message}
+          onDismiss={() => setBanner(null)}
+          className="mt-5"
+        />
+      ) : null}
+
       {isAdding ? (
         <div className="mt-5 rounded-lg border-2 border-primary-100 bg-primary-50/30 p-5">
           <h3 className="mb-4 text-xs font-semibold tracking-wide text-primary-600 uppercase">
@@ -100,18 +110,22 @@ export function AddressesCard({ addresses, onAddressesChange }) {
         </div>
       ) : null}
 
+      {addresses.length === 0 && !isAdding ? (
+        <p className="mt-5 text-sm text-neutral-500">No saved addresses yet — add one to speed up checkout.</p>
+      ) : null}
+
       <div className="mt-5 flex flex-col gap-4">
         {visibleAddresses.map((address) => {
-          const LabelIcon = LABEL_ICONS[address.label] ?? MapPin;
+          const TypeIcon = TYPE_ICONS[address.type] ?? MapPin;
           const isEditing = editingId === address.id;
           return (
             <div key={address.id} className="overflow-hidden rounded-lg border border-neutral-100 bg-neutral-50">
               <div className="p-4">
                 <div className="flex items-start justify-between gap-3">
                   <span className="flex items-center gap-1.5 text-sm font-semibold text-neutral-800">
-                    <LabelIcon className="h-4 w-4 text-primary-600" strokeWidth={1.75} />
-                    {address.label}
-                    {address.isDefault ? <Badge variant="primary">Default</Badge> : null}
+                    <TypeIcon className="h-4 w-4 text-primary-600" strokeWidth={1.75} />
+                    {TYPE_LABELS[address.type] ?? address.type}
+                    {address.defaultAddress ? <Badge variant="primary">Default</Badge> : null}
                   </span>
 
                   <div className="flex shrink-0 items-center gap-1">
@@ -131,9 +145,10 @@ export function AddressesCard({ addresses, onAddressesChange }) {
                   </div>
                 </div>
 
-                <p className="mt-3 text-sm font-medium text-neutral-800">{address.name}</p>
+                <p className="mt-3 text-sm font-medium text-neutral-800">{address.recipientName}</p>
                 <p className="mt-1 text-sm leading-relaxed text-neutral-500">
-                  {address.line1}, {address.line2}
+                  {address.addressLine1}
+                  {address.addressLine2 ? `, ${address.addressLine2}` : ''}
                   <br />
                   {address.city}, {address.state} {address.pincode}
                 </p>
@@ -160,8 +175,7 @@ export function AddressesCard({ addresses, onAddressesChange }) {
 
       {hasMore ? (
         <div className="mt-5 flex justify-center">
-          <Button variant="secondary" size="sm" onClick={handleShowMore} disabled={isFetchingMore}>
-            {isFetchingMore ? <Loader size="sm" /> : null}
+          <Button variant="secondary" size="sm" onClick={() => setVisibleCount((count) => count + PAGE_SIZE)}>
             Show More
           </Button>
         </div>
@@ -173,7 +187,7 @@ export function AddressesCard({ addresses, onAddressesChange }) {
         onConfirm={handleDeleteConfirmed}
         title="Delete Address"
         description="Are you sure you want to delete this address? This action cannot be undone."
-        confirmLabel="Delete"
+        confirmLabel={isDeleting ? 'Deleting…' : 'Delete'}
       />
     </Card>
   );

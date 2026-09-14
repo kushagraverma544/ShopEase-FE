@@ -52,12 +52,7 @@ export function AuthPage() {
     if (mode === 'register') {
       // TODO: wire up to the real register endpoint once the backend contract exists.
       dispatch(
-        userLoggedIn({
-          username: name || email.split('@')[0],
-          accessToken: null,
-          refreshToken: null,
-          expiresAt: null,
-        }),
+        userLoggedIn({ username: name || email.split('@')[0], accessToken: null, refreshToken: null }),
       );
       navigate(ROUTE_PATHS.HOME);
       return;
@@ -67,12 +62,7 @@ export function AuthPage() {
     try {
       const data = await login({ username, password });
       dispatch(
-        userLoggedIn({
-          username,
-          accessToken: data.accessToken,
-          refreshToken: data.refreshToken,
-          expiresAt: Date.now() + data.expiresIn * 1000,
-        }),
+        userLoggedIn({ username, accessToken: data.accessToken, refreshToken: data.refreshToken }),
       );
       navigate(ROUTE_PATHS.HOME);
     } catch (err) {
@@ -89,9 +79,7 @@ export function AuthPage() {
 
   function handleGoogleContinue() {
     // TODO: real Google OAuth flow goes here once the backend supports it.
-    dispatch(
-      userLoggedIn({ username: 'google-user', accessToken: null, refreshToken: null, expiresAt: null }),
-    );
+    dispatch(userLoggedIn({ username: 'google-user', accessToken: null, refreshToken: null }));
     navigate(ROUTE_PATHS.HOME);
   }
 

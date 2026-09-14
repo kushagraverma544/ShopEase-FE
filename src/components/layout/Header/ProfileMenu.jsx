@@ -2,7 +2,6 @@ import { LogOut, User } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 
 import { Button } from '../../../components/common/Button/Button';
-import { IconButton } from '../../../components/common/IconButton/IconButton';
 import { useLogout } from '../../../features/auth/useLogout';
 import { ROUTE_PATHS } from '../../../routes/routePaths';
 
@@ -11,7 +10,18 @@ export function ProfileMenu({ currentUser }) {
 
   return (
     <div className="group relative">
-      <IconButton icon={User} label={currentUser ? currentUser.username : 'Account'} />
+      <button
+        type="button"
+        aria-label={currentUser ? undefined : 'Account'}
+        className="flex h-10 items-center gap-2 rounded-full pl-2 pr-3 text-neutral-600 transition-colors duration-150 hover:bg-neutral-100 hover:text-neutral-900"
+      >
+        <User className="h-5 w-5 shrink-0" strokeWidth={1.75} />
+        {currentUser ? (
+          <span className="hidden max-w-[8rem] truncate text-sm font-medium text-neutral-800 sm:inline">
+            {currentUser.fullName || currentUser.username}
+          </span>
+        ) : null}
+      </button>
 
       <div className="hidden absolute right-0 top-full z-10 pt-2 group-hover:block group-focus-within:block">
         <div className="w-44 rounded-md border border-neutral-100 bg-neutral-0 p-2 shadow-drawer">
