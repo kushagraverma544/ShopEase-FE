@@ -13,6 +13,9 @@ export const ROUTE_PATHS = {
   ACCOUNT: '/account',
   ORDERS: '/orders',
   LOGIN: '/login',
+  SELLER_DASHBOARD: '/seller/dashboard',
+  SELLER_LISTINGS: '/seller/listings',
+  SELLER_ADD_PRODUCT: '/seller/listings/new',
 };
 
 // Builds a concrete link target for the PRODUCT_DETAILS route pattern.

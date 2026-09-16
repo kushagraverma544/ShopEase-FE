@@ -1,5 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 
+import { decodeJwt } from '../../utils/jwtDecode';
+
 // Persisted to localStorage (see authStorage.js) so a page refresh doesn't
 // log the user out mid-session — the auth API contract flags this as an
 // accepted tradeoff for now (ideally memory/httpOnly cookie, localStorage
@@ -8,6 +10,7 @@ const initialState = {
   user: null,
   accessToken: null,
   refreshToken: null,
+  roles: [],
 };
 
 const authSlice = createSlice({
@@ -19,6 +22,9 @@ const authSlice = createSlice({
       state.user = { username, fullName: null };
       state.accessToken = accessToken;
       state.refreshToken = refreshToken;
+      // Keycloak puts realm roles (CUSTOMER/SELLER/ADMIN) in the JWT itself —
+      // decode it here instead of asking the backend for a separate role call.
+      state.roles = decodeJwt(accessToken)?.realm_access?.roles ?? [];
     },
     userLoggedOut() {
       return initialState;
@@ -38,5 +44,8 @@ export const selectCurrentUser = (state) => state.auth.user;
 export const selectIsAuthenticated = (state) => Boolean(state.auth.user);
 export const selectAccessToken = (state) => state.auth.accessToken;
 export const selectRefreshToken = (state) => state.auth.refreshToken;
+// `?? []` guards sessions persisted before `roles` existed on this slice.
+export const selectUserRoles = (state) => state.auth.roles ?? [];
+export const selectIsSeller = (state) => selectUserRoles(state).includes('SELLER');
 
 export default authSlice.reducer;
