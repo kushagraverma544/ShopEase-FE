@@ -11,8 +11,17 @@ export const ROUTE_PATHS = {
   WISHLIST: '/wishlist',
   SETTINGS: '/settings',
   ACCOUNT: '/account',
+  BECOME_SELLER: '/account/become-seller',
   ORDERS: '/orders',
   LOGIN: '/login',
+  SELLER_DASHBOARD: '/seller/dashboard',
+  SELLER_LISTINGS: '/seller/listings',
+  SELLER_ADD_PRODUCT: '/seller/listings/new',
+  // Deliberately not '/seller/profile' — that exact path is reserved for the
+  // vite dev proxy to GET /seller/profile (see vite.config.js); using it here
+  // too would make a hard refresh on this page get proxied to the API
+  // instead of served the SPA shell.
+  SELLER_PROFILE: '/seller/my-profile',
 };
 
 // Builds a concrete link target for the PRODUCT_DETAILS route pattern.

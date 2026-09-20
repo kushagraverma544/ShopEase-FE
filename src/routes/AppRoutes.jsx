@@ -3,14 +3,21 @@ import { Route, Routes } from 'react-router-dom';
 
 import { Loader } from '../components/common/Loader/Loader';
 import { MainLayout } from '../components/layout/MainLayout';
+import { SellerLayout } from '../components/layout/SellerLayout';
 import { PrivateRoute } from './PrivateRoute';
 import { ROUTE_PATHS } from './routePaths';
+import { SellerRoute } from './SellerRoute';
 
 const LandingPage = lazy(() => import('../pages/Landing/LandingPage'));
 const ProductListingPage = lazy(() => import('../pages/Products/ProductListingPage'));
 const ProductDetailPage = lazy(() => import('../pages/ProductDetail/ProductDetailPage'));
 const AuthPage = lazy(() => import('../pages/Auth/AuthPage'));
 const AccountPage = lazy(() => import('../pages/Account/AccountPage'));
+const BecomeSellerPage = lazy(() => import('../pages/Account/BecomeSellerPage'));
+const SellerDashboardPage = lazy(() => import('../pages/Seller/SellerDashboardPage'));
+const SellerListingsPage = lazy(() => import('../pages/Seller/SellerListingsPage'));
+const SellerAddProductPage = lazy(() => import('../pages/Seller/SellerAddProductPage'));
+const SellerProfilePage = lazy(() => import('../pages/Seller/SellerProfilePage'));
 
 export function AppRoutes() {
   return (
@@ -25,6 +32,16 @@ export function AppRoutes() {
 
           <Route element={<PrivateRoute />}>
             <Route path={ROUTE_PATHS.ACCOUNT} element={<AccountPage />} />
+            <Route path={ROUTE_PATHS.BECOME_SELLER} element={<BecomeSellerPage />} />
+          </Route>
+        </Route>
+
+        <Route element={<SellerRoute />}>
+          <Route element={<SellerLayout />}>
+            <Route path={ROUTE_PATHS.SELLER_DASHBOARD} element={<SellerDashboardPage />} />
+            <Route path={ROUTE_PATHS.SELLER_LISTINGS} element={<SellerListingsPage />} />
+            <Route path={ROUTE_PATHS.SELLER_ADD_PRODUCT} element={<SellerAddProductPage />} />
+            <Route path={ROUTE_PATHS.SELLER_PROFILE} element={<SellerProfilePage />} />
           </Route>
         </Route>
       </Routes>

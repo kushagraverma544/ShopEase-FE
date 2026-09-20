@@ -13,6 +13,7 @@ import { ROUTE_PATHS } from '../../routes/routePaths';
 import { login } from '../../services/authService';
 import { getRandomPhoto } from '../../services/unsplashService';
 import { cn } from '../../utils/cn';
+import { decodeJwt } from '../../utils/jwtDecode';
 
 export function AuthPage() {
   const dispatch = useAppDispatch();
@@ -64,7 +65,8 @@ export function AuthPage() {
       dispatch(
         userLoggedIn({ username, accessToken: data.accessToken, refreshToken: data.refreshToken }),
       );
-      navigate(ROUTE_PATHS.HOME);
+      const roles = decodeJwt(data.accessToken)?.realm_access?.roles ?? [];
+      navigate(roles.includes('SELLER') ? ROUTE_PATHS.SELLER_DASHBOARD : ROUTE_PATHS.HOME);
     } catch (err) {
       setError(err.message);
     } finally {

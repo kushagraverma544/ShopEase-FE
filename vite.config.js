@@ -29,6 +29,22 @@ export default defineConfig(({ command, mode }) => {
           target: 'http://localhost:8081',
           changeOrigin: true,
         },
+        // Scoped to the seller-application API paths only (not a blanket
+        // '/seller' prefix) — that would also swallow the '/seller/*'
+        // frontend routes (dashboard, listings) on a hard navigation/refresh,
+        // since those share the prefix but must be served the SPA shell.
+        '/seller/application-status': {
+          target: 'http://localhost:8081',
+          changeOrigin: true,
+        },
+        '/seller/apply': {
+          target: 'http://localhost:8081',
+          changeOrigin: true,
+        },
+        '/seller/profile': {
+          target: 'http://localhost:8081',
+          changeOrigin: true,
+        },
       },
     },
     build: {
