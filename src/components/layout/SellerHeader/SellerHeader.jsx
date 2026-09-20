@@ -39,7 +39,11 @@ export function SellerHeader() {
           <span className="hidden sm:inline">Back to Store</span>
         </NavLink>
 
-        <ProfileMenu currentUser={currentUser} />
+        <ProfileMenu
+          currentUser={currentUser}
+          accountPath={ROUTE_PATHS.SELLER_PROFILE}
+          accountLabel="Seller Profile"
+        />
       </div>
     </header>
   );

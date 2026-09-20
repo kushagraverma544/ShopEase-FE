@@ -19,4 +19,9 @@ export const ENDPOINTS = {
     ADDRESSES: '/me/addresses',
     ADDRESS_DETAIL: (id) => `/me/addresses/${id}`,
   },
+  SELLER_APPLICATION: {
+    STATUS: '/seller/application-status',
+    APPLY: '/seller/apply',
+    PROFILE: '/seller/profile',
+  },
 };

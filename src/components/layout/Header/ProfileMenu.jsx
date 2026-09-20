@@ -5,7 +5,16 @@ import { Button } from '../../../components/common/Button/Button';
 import { useLogout } from '../../../features/auth/useLogout';
 import { ROUTE_PATHS } from '../../../routes/routePaths';
 
-export function ProfileMenu({ currentUser }) {
+// accountPath/accountLabel let SellerHeader point this at the seller's own
+// profile instead of the generic customer /account page — without that,
+// a seller clicking their profile menu from inside Seller Console got
+// bounced out to the customer-facing account page (and its Sidebar) instead
+// of staying on their seller info.
+export function ProfileMenu({
+  currentUser,
+  accountPath = ROUTE_PATHS.ACCOUNT,
+  accountLabel = 'My Account',
+}) {
   const handleLogout = useLogout();
 
   return (
@@ -28,10 +37,10 @@ export function ProfileMenu({ currentUser }) {
           {currentUser ? (
             <>
               <NavLink
-                to={ROUTE_PATHS.ACCOUNT}
+                to={accountPath}
                 className="flex h-10 items-center rounded-md px-3 text-sm font-medium text-neutral-700 hover:bg-neutral-100"
               >
-                My Account
+                {accountLabel}
               </NavLink>
               <NavLink
                 to={ROUTE_PATHS.ORDERS}

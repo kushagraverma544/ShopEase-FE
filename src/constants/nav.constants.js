@@ -1,4 +1,12 @@
-import { Home, LayoutDashboard, LayoutGrid, Package, PlusCircle, Settings } from 'lucide-react';
+import {
+  Home,
+  LayoutDashboard,
+  LayoutGrid,
+  Package,
+  PlusCircle,
+  Settings,
+  Store,
+} from 'lucide-react';
 
 import { ROUTE_PATHS } from '../routes/routePaths';
 
@@ -29,5 +37,5 @@ export const SELLER_SIDEBAR_NAV_ITEMS = [
     icon: PlusCircle,
     path: ROUTE_PATHS.SELLER_ADD_PRODUCT,
   },
+  { id: 'seller-profile', label: 'Seller Profile', icon: Store, path: ROUTE_PATHS.SELLER_PROFILE },
 ];
-

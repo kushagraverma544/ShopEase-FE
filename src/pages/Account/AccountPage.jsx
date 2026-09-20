@@ -1,9 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { Navigate } from 'react-router-dom';
 
 import { ErrorState } from '../../components/common/ErrorState/ErrorState';
 import { Skeleton } from '../../components/common/Skeleton/Skeleton';
-import { userProfileUpdated } from '../../features/auth/authSlice';
+import { selectIsSeller, userProfileUpdated } from '../../features/auth/authSlice';
 import { useAppDispatch } from '../../hooks/useAppDispatch';
+import { useAppSelector } from '../../hooks/useAppSelector';
+import { ROUTE_PATHS } from '../../routes/routePaths';
 import { getMyDetails } from '../../services/meService';
 import { getProfileCompletion } from './profileCompletion';
 import { AddressesCard } from './sections/AddressesCard';
@@ -12,9 +15,14 @@ import { PaymentCardsCard } from './sections/PaymentCardsCard';
 import { PersonalDetailsCard } from './sections/PersonalDetailsCard';
 import { ProfileCompletionBar } from './sections/ProfileCompletionBar';
 import { ProfileSidebar } from './sections/ProfileSidebar';
+import { SellerApplicationCard } from './sections/SellerApplicationCard';
 
+// /account (GET /me) is the customer profile — a seller has their own
+// profile (GET /seller/profile) under Seller Console, so they're bounced
+// there immediately instead of ever seeing this page or its Sidebar.
 export function AccountPage() {
   const dispatch = useAppDispatch();
+  const isSeller = useAppSelector(selectIsSeller);
   const [details, setDetails] = useState(null);
   const [status, setStatus] = useState('loading');
   const [cards, setCards] = useState([]);
@@ -34,12 +42,13 @@ export function AccountPage() {
   }, []);
 
   useEffect(() => {
+    if (isSeller) return undefined;
     isMountedRef.current = true;
     loadDetails();
     return () => {
       isMountedRef.current = false;
     };
-  }, [loadDetails]);
+  }, [isSeller, loadDetails]);
 
   const retryDetails = useCallback(() => {
     setStatus('loading');
@@ -52,6 +61,10 @@ export function AccountPage() {
   useEffect(() => {
     if (details) dispatch(userProfileUpdated({ fullName: details.fullName }));
   }, [details, dispatch]);
+
+  // All hooks above run unconditionally on every render (Rules of Hooks) —
+  // this early return only happens after that.
+  if (isSeller) return <Navigate to={ROUTE_PATHS.SELLER_PROFILE} replace />;
 
   if (status === 'loading') {
     return (
@@ -100,6 +113,7 @@ export function AccountPage() {
             onAddressesChange={(addresses) => setDetails((current) => ({ ...current, addresses }))}
           />
           <PaymentCardsCard cards={cards} onCardsChange={setCards} />
+          <SellerApplicationCard />
         </div>
       </div>
     </div>
