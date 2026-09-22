@@ -23,5 +23,13 @@ export const ENDPOINTS = {
     STATUS: '/seller/application-status',
     APPLY: '/seller/apply',
     PROFILE: '/seller/profile',
+    HISTORY: '/seller/history',
+  },
+  ADMIN: {
+    SELLERS: '/admin/sellers',
+    APPROVE: (id) => `/admin/sellers/${id}/approve`,
+    REJECT: (id) => `/admin/sellers/${id}/reject`,
+    HOLD: (id) => `/admin/sellers/${id}/hold`,
+    HISTORY: (id) => `/admin/sellers/${id}/history`,
   },
 };

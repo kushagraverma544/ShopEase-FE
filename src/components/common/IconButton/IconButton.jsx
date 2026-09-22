@@ -20,7 +20,7 @@ export function IconButton({
       {...(Component === 'button' ? { type: 'button' } : null)}
       aria-label={label}
       className={cn(
-        'inline-flex items-center justify-center rounded-full text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900 transition-colors duration-150 disabled:pointer-events-none disabled:opacity-40',
+        'inline-flex items-center justify-center rounded-full text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900 transition-colors duration-150 disabled:pointer-events-none disabled:opacity-40 dark:text-neutral-300 dark:hover:bg-neutral-700 dark:hover:text-neutral-50',
         SIZE_CLASSES[size],
         className,
       )}

@@ -1,11 +1,16 @@
 import {
+  CreditCard,
+  FileText,
   Home,
   LayoutDashboard,
   LayoutGrid,
+  LineChart,
   Package,
   PlusCircle,
   Settings,
   Store,
+  UserPlus,
+  Users,
 } from 'lucide-react';
 
 import { ROUTE_PATHS } from '../routes/routePaths';
@@ -38,4 +43,51 @@ export const SELLER_SIDEBAR_NAV_ITEMS = [
     path: ROUTE_PATHS.SELLER_ADD_PRODUCT,
   },
   { id: 'seller-profile', label: 'Seller Profile', icon: Store, path: ROUTE_PATHS.SELLER_PROFILE },
+];
+
+// AdminSidebar's nav, grouped into sections (General/Operations/People/
+// Compliance) the way a standard marketplace admin console is organized.
+// Only Dashboard and Seller Applications have real backends today — every
+// other entry is a disabled "Soon" placeholder reserving its spot, per the
+// same pattern the admin spec already established for Customers/Analytics:
+// visible in the IA, not faked with mock functionality (Onboarding in
+// particular creates other ADMIN accounts — too sensitive to mock).
+export const ADMIN_SIDEBAR_NAV_GROUPS = [
+  {
+    id: 'general',
+    label: 'General',
+    items: [
+      { id: 'admin-dashboard', label: 'Dashboard', icon: LayoutDashboard, path: ROUTE_PATHS.ADMIN_DASHBOARD },
+    ],
+  },
+  {
+    id: 'operations',
+    label: 'Operations',
+    items: [
+      {
+        id: 'admin-seller-applications',
+        label: 'Seller Applications',
+        icon: Store,
+        path: ROUTE_PATHS.ADMIN_SELLER_APPLICATIONS,
+      },
+      { id: 'admin-orders', label: 'Orders', icon: Package, disabled: true },
+      { id: 'admin-payments', label: 'Payments', icon: CreditCard, disabled: true },
+    ],
+  },
+  {
+    id: 'people',
+    label: 'People',
+    items: [
+      { id: 'admin-customers', label: 'Customers', icon: Users, disabled: true },
+      { id: 'admin-onboarding', label: 'Admin Onboarding', icon: UserPlus, disabled: true },
+    ],
+  },
+  {
+    id: 'compliance',
+    label: 'Compliance',
+    items: [
+      { id: 'admin-audit-log', label: 'Audit Log', icon: FileText, disabled: true },
+      { id: 'admin-analytics', label: 'Analytics', icon: LineChart, disabled: true },
+    ],
+  },
 ];

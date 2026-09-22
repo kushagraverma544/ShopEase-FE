@@ -45,6 +45,20 @@ export default defineConfig(({ command, mode }) => {
           target: 'http://localhost:8081',
           changeOrigin: true,
         },
+        '/seller/history': {
+          target: 'http://localhost:8081',
+          changeOrigin: true,
+        },
+        // Scoped to /admin/sellers only (not a blanket '/admin' prefix), same
+        // reasoning as the /seller/* entries above — a future /admin/* FE
+        // route (e.g. a customers or analytics page) shouldn't get swallowed
+        // by this proxy on a hard refresh. Target assumed to be the same
+        // user-service as the other Keycloak-backed endpoints above; confirm
+        // with BE if this 404s.
+        '/admin/sellers': {
+          target: 'http://localhost:8081',
+          changeOrigin: true,
+        },
       },
     },
     build: {

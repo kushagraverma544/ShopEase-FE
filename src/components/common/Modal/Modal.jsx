@@ -34,12 +34,12 @@ export function Modal({ open, onClose, title, children, className }) {
 
       <div
         className={cn(
-          'relative w-full max-w-md rounded-xl bg-neutral-0 p-6 shadow-elevated max-h-[85vh] overflow-y-auto',
+          'relative w-full max-w-md rounded-xl bg-neutral-0 p-6 shadow-elevated max-h-[85vh] overflow-y-auto dark:bg-neutral-800',
           className,
         )}
       >
         <div className="mb-5 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-neutral-900">{title}</h2>
+          <h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-50">{title}</h2>
           <IconButton icon={X} label="Close" size="sm" onClick={onClose} />
         </div>
 

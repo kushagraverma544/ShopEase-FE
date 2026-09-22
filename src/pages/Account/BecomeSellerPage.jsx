@@ -1,4 +1,5 @@
 import {
+  AlertTriangle,
   ArrowLeft,
   Briefcase,
   Building2,
@@ -22,6 +23,7 @@ import {
 import { useCallback, useEffect, useState } from 'react';
 import { Navigate, NavLink } from 'react-router-dom';
 
+import { ApplicationHistoryTimeline } from '../../components/common/ApplicationHistoryTimeline/ApplicationHistoryTimeline';
 import { Banner } from '../../components/common/Banner/Banner';
 import { Button } from '../../components/common/Button/Button';
 import { Card } from '../../components/common/Card/Card';
@@ -37,7 +39,8 @@ import { ROUTE_PATHS } from '../../routes/routePaths';
 import { cn } from '../../utils/cn';
 import {
   applyForSeller,
-  getSellerApplicationStatus,
+  getMySellerApplicationHistory,
+  getSellerProfile,
   revokeSellerApplication,
 } from '../../services/sellerApplicationService';
 
@@ -207,6 +210,14 @@ const SELLER_BENEFITS = [
   { icon: Zap, text: 'Fast, reliable payouts to your bank' },
   { icon: Headphones, text: 'Dedicated support for sellers' },
 ];
+
+// Same gradient treatment as the admin review buttons (see
+// SellerApplicationDetailModal) — kept consistent across both sides of this
+// flow rather than a flat fill.
+const GRADIENT_PRIMARY_BTN =
+  'bg-gradient-to-b from-primary-500 to-primary-700 hover:brightness-110 active:brightness-95';
+const GRADIENT_DANGER_BTN =
+  'bg-gradient-to-b from-danger-500 to-danger-600 hover:brightness-110 active:brightness-95';
 
 // Left-rail companion to the wizard — a vertical progress list (so the
 // available width isn't just empty margin) plus a short reason-to-believe
@@ -984,22 +995,29 @@ function SellerApplicationForm({ initial, onCancel, onSubmit, submitting, error 
   );
 }
 
-// What we can show back to the user as "review" once an application is on
-// file is limited by GET /seller/application-status's contract, which only
-// returns { status, storeName, rejectionReason, appliedAt, reviewedAt } — so
-// a freshly-submitted `draft` (this session's full form) is shown when
-// present for a richer summary; anything loaded from BE alone falls back to
-// just the store name + dates. Once approved, the full picture lives on
-// GET /seller/profile (see SellerProfilePage), not here.
-function ApplicationSummary({ application, draft }) {
+// `application` is always the full GET /seller/profile response now (not the
+// old lightweight status shape), so every field here comes straight from BE
+// and survives a page reload — no more `draft` fallback needed for display.
+function ApplicationSummary({ application }) {
+  const pickupAddress = [application?.pickupAddressLine1, application?.pickupAddressLine2]
+    .filter(Boolean)
+    .join(', ');
+
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-      <SummaryRow label="Store Name" value={application?.storeName ?? draft?.storeName} />
-      <SummaryRow label="Business Name" value={draft?.businessName} />
-      <SummaryRow label="Business Email" value={draft?.businessEmail} />
-      <SummaryRow label="Business Phone" value={draft?.businessPhone} />
-      <SummaryRow label="GSTIN" value={draft?.registrationNumber} />
-      <SummaryRow label="PAN Number" value={draft?.panNumber} />
+      <SummaryRow label="Store Name" value={application?.storeName} />
+      <SummaryRow label="Business Name" value={application?.businessName} />
+      <SummaryRow label="Business Email" value={application?.businessEmail} />
+      <SummaryRow label="Business Phone" value={application?.businessPhone} />
+      <SummaryRow label="GSTIN" value={application?.registrationNumber} />
+      <SummaryRow label="PAN Number" value={application?.panNumber} />
+      <SummaryRow label="Bank Account" value={application?.bankAccountNumber} />
+      <SummaryRow label="IFSC Code" value={application?.ifscCode} />
+      <SummaryRow label="Pickup Address" value={pickupAddress} />
+      <SummaryRow
+        label="City / State"
+        value={[application?.pickupCity, application?.pickupState].filter(Boolean).join(', ')}
+      />
       <SummaryRow
         label="Applied On"
         value={application?.appliedAt ? new Date(application.appliedAt).toLocaleDateString() : null}
@@ -1012,6 +1030,34 @@ function ApplicationSummary({ application, draft }) {
       />
     </div>
   );
+}
+
+// SellerProfileResponse doesn't echo back the initial product's own fields
+// (name/price/etc.) — only `productId` — so a resubmit/re-apply pre-fill from
+// this can't restore the product wizard steps; only the seller-level fields
+// below survive a page reload. `draft` (this session's form) still wins when
+// present, since it has everything.
+function profileToFormInitial(application) {
+  if (!application) return undefined;
+  return {
+    storeName: application.storeName ?? '',
+    businessName: application.businessName ?? '',
+    businessType: application.businessType ?? '',
+    businessEmail: application.businessEmail ?? '',
+    businessPhone: application.businessPhone ?? '',
+    sellsOnlyBooks: application.sellsOnlyBooks ?? false,
+    registrationNumber: application.registrationNumber ?? '',
+    panNumber: application.panNumber ?? '',
+    bankAccountHolderName: application.bankAccountHolderName ?? '',
+    bankAccountNumber: application.bankAccountNumber ?? '',
+    ifscCode: application.ifscCode ?? '',
+    addressLine1: application.pickupAddressLine1 ?? '',
+    addressLine2: application.pickupAddressLine2 ?? '',
+    city: application.pickupCity ?? '',
+    state: application.pickupState ?? '',
+    pincode: application.pickupPincode ?? '',
+    categories: (application.categories ?? []).join(', '),
+  };
 }
 
 // Full-page seller registration flow, linked from the compact status card on
@@ -1029,17 +1075,27 @@ export function BecomeSellerPage() {
   const [banner, setBanner] = useState(null);
   const [revoking, setRevoking] = useState(false);
   const [confirmingRevoke, setConfirmingRevoke] = useState(false);
+  const [history, setHistory] = useState([]);
 
   const fetchStatus = useCallback(() => {
-    return getSellerApplicationStatus()
+    return getSellerProfile()
       .then((data) => {
         setApplication(data);
-        setStatus(data.status);
+        // REVOKED behaves like NONE on the FE — a self-initiated revoke has
+        // no remark worth showing, so just re-open the empty apply form.
+        setStatus(data.status === 'REVOKED' ? 'NONE' : data.status);
+        // Best-effort — a history-fetch failure shouldn't block the rest of
+        // the page from showing.
+        getMySellerApplicationHistory()
+          .then(setHistory)
+          .catch(() => setHistory([]));
       })
       .catch(() => {
-        // BE not reachable / endpoint not shipped yet — default to NONE so
-        // the form is still reachable instead of a dead end.
+        // 404 (never applied) is expected here; anything else (BE down,
+        // endpoint not shipped) also falls back to NONE so the form stays
+        // reachable instead of a dead end.
         setApplication(null);
+        setHistory([]);
         setStatus('NONE');
       });
   }, []);
@@ -1108,15 +1164,19 @@ export function BecomeSellerPage() {
           returnPolicy: form.initialProductReturnPolicy,
         },
       };
-      const data = await applyForSeller(payload, files);
-      setApplication(data);
-      setStatus(data.status);
+      // POST /seller/apply's own response is the lightweight status shape
+      // (no businessName/bankAccountNumber/etc.), so re-fetch the full
+      // profile afterward rather than binding `application` to it directly
+      // — otherwise the summary would go blank right after submitting, the
+      // same bug this page was just fixed for.
+      await applyForSeller(payload, files);
       setDraft(form);
       setIsEditing(false);
       setBanner({
         variant: 'success',
         message: "Application submitted — we'll review it shortly.",
       });
+      await fetchStatus();
     } catch (err) {
       // Covers the 409 "already PENDING/APPROVED" case too — BE's message is
       // shown as-is rather than re-worded here.
@@ -1148,7 +1208,8 @@ export function BecomeSellerPage() {
 
   if (isSeller) return <Navigate to={ROUTE_PATHS.ACCOUNT} replace />;
 
-  const isWizardVisible = status === 'NONE' || (status === 'REJECTED' && isEditing);
+  const isWizardVisible =
+    status === 'NONE' || ((status === 'REJECTED' || status === 'HOLD') && isEditing);
 
   return (
     <div
@@ -1202,40 +1263,122 @@ export function BecomeSellerPage() {
           <div className="flex items-start gap-3 rounded-lg bg-warning-50 p-4">
             <Clock className="mt-0.5 h-5 w-5 shrink-0 text-warning-600" strokeWidth={1.75} />
             <div>
-              <p className="text-sm font-medium text-warning-600">Application under review</p>
+              <p className="text-sm font-medium text-warning-600">
+                {application?.correctionSubmittedAt
+                  ? 'Your corrected application is under review'
+                  : 'Application under review'}
+              </p>
               <p className="mt-0.5 text-xs text-neutral-500">
                 We'll notify you once it's reviewed.
               </p>
             </div>
           </div>
 
-          <ApplicationSummary application={application} draft={draft} />
+          <ApplicationSummary application={application} />
+
+          {history.length ? (
+            <div className="border-t border-neutral-100 pt-5">
+              <ApplicationHistoryTimeline history={history} />
+            </div>
+          ) : null}
 
           <div className="flex justify-end border-t border-neutral-100 pt-5">
-            <Button variant="danger" onClick={() => setConfirmingRevoke(true)}>
+            <Button
+              variant="danger"
+              onClick={() => setConfirmingRevoke(true)}
+              className={GRADIENT_DANGER_BTN}
+            >
               Revoke Application
             </Button>
           </div>
         </Card>
       ) : null}
 
-      {status === 'REJECTED' && !isEditing ? (
+      {status === 'HOLD' && !isEditing ? (
         <Card className="flex flex-col gap-5 p-6">
-          <div className="flex items-start gap-3 rounded-lg bg-danger-50 p-4">
-            <XCircle className="mt-0.5 h-5 w-5 shrink-0 text-danger-600" strokeWidth={1.75} />
-            <div>
-              <p className="text-sm font-medium text-danger-600">Application rejected</p>
-              <p className="mt-0.5 text-xs text-neutral-500">
-                {application?.rejectionReason || 'No reason was provided.'}
+          <div className="flex items-start gap-3 rounded-lg bg-warning-50 p-4">
+            <AlertTriangle
+              className="mt-0.5 h-5 w-5 shrink-0 text-warning-600"
+              strokeWidth={1.75}
+            />
+            <div className="flex-1">
+              <p className="text-sm font-medium text-warning-600">
+                Action needed on your application
+              </p>
+              <p className="mt-2.5 text-xs font-semibold tracking-wide text-neutral-500 uppercase">
+                Reviewer's Remark
+              </p>
+              <p className="mt-1 text-sm font-medium text-danger-600">
+                {application?.adminRemark || 'The reviewer asked for a correction.'}
               </p>
             </div>
           </div>
 
-          <ApplicationSummary application={application} draft={draft} />
+          <ApplicationSummary application={application} />
+
+          {history.length ? (
+            <div className="border-t border-neutral-100 pt-5">
+              <ApplicationHistoryTimeline history={history} />
+            </div>
+          ) : null}
 
           <div className="flex justify-end gap-3 border-t border-neutral-100 pt-5">
-            <Button onClick={() => setIsEditing(true)}>Re-apply</Button>
-            <Button variant="danger" onClick={() => setConfirmingRevoke(true)}>
+            <Button onClick={() => setIsEditing(true)} className={GRADIENT_PRIMARY_BTN}>
+              Update & Resubmit
+            </Button>
+            <Button
+              variant="danger"
+              onClick={() => setConfirmingRevoke(true)}
+              className={GRADIENT_DANGER_BTN}
+            >
+              Revoke Application
+            </Button>
+          </div>
+        </Card>
+      ) : null}
+
+      {status === 'HOLD' && isEditing ? (
+        <SellerApplicationForm
+          initial={draft ?? profileToFormInitial(application)}
+          onCancel={() => setIsEditing(false)}
+          onSubmit={handleApply}
+          submitting={submitting}
+          error={formError}
+        />
+      ) : null}
+
+      {status === 'REJECTED' && !isEditing ? (
+        <Card className="flex flex-col gap-5 p-6">
+          <div className="flex items-start gap-3 rounded-lg bg-danger-50 p-4">
+            <XCircle className="mt-0.5 h-5 w-5 shrink-0 text-danger-600" strokeWidth={1.75} />
+            <div className="flex-1">
+              <p className="text-sm font-medium text-danger-600">Application rejected</p>
+              <p className="mt-2.5 text-xs font-semibold tracking-wide text-neutral-500 uppercase">
+                Reviewer's Remark
+              </p>
+              <p className="mt-1 text-sm font-medium text-danger-600">
+                {application?.adminRemark || 'No reason was provided.'}
+              </p>
+            </div>
+          </div>
+
+          <ApplicationSummary application={application} />
+
+          {history.length ? (
+            <div className="border-t border-neutral-100 pt-5">
+              <ApplicationHistoryTimeline history={history} />
+            </div>
+          ) : null}
+
+          <div className="flex justify-end gap-3 border-t border-neutral-100 pt-5">
+            <Button onClick={() => setIsEditing(true)} className={GRADIENT_PRIMARY_BTN}>
+              Re-apply
+            </Button>
+            <Button
+              variant="danger"
+              onClick={() => setConfirmingRevoke(true)}
+              className={GRADIENT_DANGER_BTN}
+            >
               Revoke Application
             </Button>
           </div>
@@ -1244,7 +1387,7 @@ export function BecomeSellerPage() {
 
       {status === 'REJECTED' && isEditing ? (
         <SellerApplicationForm
-          initial={draft ?? { storeName: application?.storeName ?? '' }}
+          initial={draft ?? profileToFormInitial(application)}
           onCancel={() => setIsEditing(false)}
           onSubmit={handleApply}
           submitting={submitting}
@@ -1261,10 +1404,18 @@ export function BecomeSellerPage() {
             </p>
           </div>
 
-          <ApplicationSummary application={application} draft={draft} />
+          <ApplicationSummary application={application} />
+
+          {history.length ? (
+            <div className="border-t border-neutral-100 pt-5">
+              <ApplicationHistoryTimeline history={history} />
+            </div>
+          ) : null}
 
           <div className="flex justify-end border-t border-neutral-100 pt-5">
-            <Button onClick={handleReLogin}>Log In Again</Button>
+            <Button onClick={handleReLogin} className={GRADIENT_PRIMARY_BTN}>
+              Log In Again
+            </Button>
           </div>
         </Card>
       ) : null}

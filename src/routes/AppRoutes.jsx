@@ -2,8 +2,10 @@ import { lazy, Suspense } from 'react';
 import { Route, Routes } from 'react-router-dom';
 
 import { Loader } from '../components/common/Loader/Loader';
+import { AdminLayout } from '../components/layout/AdminLayout';
 import { MainLayout } from '../components/layout/MainLayout';
 import { SellerLayout } from '../components/layout/SellerLayout';
+import { AdminRoute } from './AdminRoute';
 import { PrivateRoute } from './PrivateRoute';
 import { ROUTE_PATHS } from './routePaths';
 import { SellerRoute } from './SellerRoute';
@@ -18,6 +20,8 @@ const SellerDashboardPage = lazy(() => import('../pages/Seller/SellerDashboardPa
 const SellerListingsPage = lazy(() => import('../pages/Seller/SellerListingsPage'));
 const SellerAddProductPage = lazy(() => import('../pages/Seller/SellerAddProductPage'));
 const SellerProfilePage = lazy(() => import('../pages/Seller/SellerProfilePage'));
+const AdminSellerApplicationsPage = lazy(() => import('../pages/Admin/AdminSellerApplicationsPage'));
+const AdminDashboardPage = lazy(() => import('../pages/Admin/AdminDashboardPage'));
 
 export function AppRoutes() {
   return (
@@ -42,6 +46,13 @@ export function AppRoutes() {
             <Route path={ROUTE_PATHS.SELLER_LISTINGS} element={<SellerListingsPage />} />
             <Route path={ROUTE_PATHS.SELLER_ADD_PRODUCT} element={<SellerAddProductPage />} />
             <Route path={ROUTE_PATHS.SELLER_PROFILE} element={<SellerProfilePage />} />
+          </Route>
+        </Route>
+
+        <Route element={<AdminRoute />}>
+          <Route element={<AdminLayout />}>
+            <Route path={ROUTE_PATHS.ADMIN_DASHBOARD} element={<AdminDashboardPage />} />
+            <Route path={ROUTE_PATHS.ADMIN_SELLER_APPLICATIONS} element={<AdminSellerApplicationsPage />} />
           </Route>
         </Route>
       </Routes>

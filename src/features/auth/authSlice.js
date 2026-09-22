@@ -47,5 +47,6 @@ export const selectRefreshToken = (state) => state.auth.refreshToken;
 // `?? []` guards sessions persisted before `roles` existed on this slice.
 export const selectUserRoles = (state) => state.auth.roles ?? [];
 export const selectIsSeller = (state) => selectUserRoles(state).includes('SELLER');
+export const selectIsAdmin = (state) => selectUserRoles(state).includes('ADMIN');
 
 export default authSlice.reducer;

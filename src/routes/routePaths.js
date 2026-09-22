@@ -22,6 +22,10 @@ export const ROUTE_PATHS = {
   // too would make a hard refresh on this page get proxied to the API
   // instead of served the SPA shell.
   SELLER_PROFILE: '/seller/my-profile',
+  // Deliberately not '/admin/sellers' — same reasoning as SELLER_PROFILE
+  // above, that path is reserved for the vite dev proxy to GET /admin/sellers.
+  ADMIN_SELLER_APPLICATIONS: '/admin/applications',
+  ADMIN_DASHBOARD: '/admin/dashboard',
 };
 
 // Builds a concrete link target for the PRODUCT_DETAILS route pattern.

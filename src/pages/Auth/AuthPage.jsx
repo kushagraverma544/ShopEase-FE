@@ -1,23 +1,35 @@
 import { Lock, Mail, User } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { Navigate, NavLink, useNavigate } from 'react-router-dom';
 
 import logo from '../../assets/logo.png';
 import { Button } from '../../components/common/Button/Button';
 import { GoogleIcon } from '../../components/common/GoogleIcon/GoogleIcon';
 import { Input } from '../../components/common/Input/Input';
 import { AUTH_PAGE_CONTENT } from '../../constants/authPage.constants';
-import { userLoggedIn } from '../../features/auth/authSlice';
+import { selectIsAuthenticated, selectUserRoles, userLoggedIn } from '../../features/auth/authSlice';
 import { useAppDispatch } from '../../hooks/useAppDispatch';
+import { useAppSelector } from '../../hooks/useAppSelector';
 import { ROUTE_PATHS } from '../../routes/routePaths';
 import { login } from '../../services/authService';
 import { getRandomPhoto } from '../../services/unsplashService';
 import { cn } from '../../utils/cn';
 import { decodeJwt } from '../../utils/jwtDecode';
 
+// Single source of truth for "where does this role land" — used both right
+// after login and by the already-authenticated guard below, so the two
+// can't drift out of sync.
+function getPostLoginPath(roles) {
+  if (roles.includes('ADMIN')) return ROUTE_PATHS.ADMIN_DASHBOARD;
+  if (roles.includes('SELLER')) return ROUTE_PATHS.SELLER_DASHBOARD;
+  return ROUTE_PATHS.HOME;
+}
+
 export function AuthPage() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const isAuthenticated = useAppSelector(selectIsAuthenticated);
+  const roles = useAppSelector(selectUserRoles);
 
   const [mode, setMode] = useState('login');
   const [backgroundUrl, setBackgroundUrl] = useState(null);
@@ -46,6 +58,13 @@ export function AuthPage() {
     };
   }, []);
 
+  // Already logged in (e.g. browser Back after a successful login, or
+  // visiting /login directly with a live session) — bounce away immediately
+  // instead of showing the form again. Combined with the `replace: true`
+  // navigates below, this login page never sits in browser history as a
+  // page Back can land you back on.
+  if (isAuthenticated) return <Navigate to={getPostLoginPath(roles)} replace />;
+
   async function handleSubmit(event) {
     event.preventDefault();
     setError(null);
@@ -55,7 +74,7 @@ export function AuthPage() {
       dispatch(
         userLoggedIn({ username: name || email.split('@')[0], accessToken: null, refreshToken: null }),
       );
-      navigate(ROUTE_PATHS.HOME);
+      navigate(ROUTE_PATHS.HOME, { replace: true });
       return;
     }
 
@@ -65,8 +84,8 @@ export function AuthPage() {
       dispatch(
         userLoggedIn({ username, accessToken: data.accessToken, refreshToken: data.refreshToken }),
       );
-      const roles = decodeJwt(data.accessToken)?.realm_access?.roles ?? [];
-      navigate(roles.includes('SELLER') ? ROUTE_PATHS.SELLER_DASHBOARD : ROUTE_PATHS.HOME);
+      const loggedInRoles = decodeJwt(data.accessToken)?.realm_access?.roles ?? [];
+      navigate(getPostLoginPath(loggedInRoles), { replace: true });
     } catch (err) {
       setError(err.message);
     } finally {
@@ -82,7 +101,7 @@ export function AuthPage() {
   function handleGoogleContinue() {
     // TODO: real Google OAuth flow goes here once the backend supports it.
     dispatch(userLoggedIn({ username: 'google-user', accessToken: null, refreshToken: null }));
-    navigate(ROUTE_PATHS.HOME);
+    navigate(ROUTE_PATHS.HOME, { replace: true });
   }
 
   return (

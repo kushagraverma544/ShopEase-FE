@@ -5,8 +5,16 @@ import { cn } from '../../../utils/cn';
 import { IconButton } from '../IconButton/IconButton';
 
 const VARIANTS = {
-  success: { icon: CheckCircle2, bgClassName: 'bg-success-50', iconClassName: 'text-success-600' },
-  error: { icon: TriangleAlert, bgClassName: 'bg-danger-50', iconClassName: 'text-danger-600' },
+  success: {
+    icon: CheckCircle2,
+    bgClassName: 'bg-success-50 dark:bg-success-500/10',
+    iconClassName: 'text-success-600 dark:text-success-400',
+  },
+  error: {
+    icon: TriangleAlert,
+    bgClassName: 'bg-danger-50 dark:bg-danger-500/10',
+    iconClassName: 'text-danger-600 dark:text-danger-400',
+  },
 };
 
 // Fire-and-forget feedback for an action that just completed (a save, a
@@ -27,7 +35,7 @@ export function Banner({ variant = 'success', message, onDismiss, autoDismissMs 
     <div
       role="status"
       className={cn(
-        'flex items-start gap-3 rounded-lg px-4 py-3 text-sm font-medium text-neutral-800',
+        'flex items-start gap-3 rounded-lg px-4 py-3 text-sm font-medium text-neutral-800 dark:text-neutral-100',
         bgClassName,
         className,
       )}

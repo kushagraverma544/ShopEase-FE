@@ -3,17 +3,22 @@ import { cn } from '../../../utils/cn';
 // Generic column-config table — feed it `columns` ({key, header, render, align})
 // and `data`, reusable for any row shape (seller listings today, an Admin
 // products/orders table later) without changing this file.
-export function Table({ columns, data, getRowKey = (row) => row.id, className }) {
+export function Table({ columns, data, getRowKey = (row) => row.id, onRowClick, className }) {
   return (
-    <div className={cn('overflow-x-auto rounded-lg border border-neutral-100 bg-neutral-0', className)}>
+    <div
+      className={cn(
+        'overflow-x-auto rounded-lg border border-neutral-100 bg-neutral-0 dark:border-neutral-700 dark:bg-neutral-800',
+        className,
+      )}
+    >
       <table className="w-full text-sm">
-        <thead className="border-b border-neutral-100 bg-neutral-50">
+        <thead className="border-b border-neutral-100 bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-900/40">
           <tr>
             {columns.map((column) => (
               <th
                 key={column.key}
                 className={cn(
-                  'whitespace-nowrap px-4 py-3 text-xs font-medium tracking-wide text-neutral-500 uppercase',
+                  'whitespace-nowrap px-4 py-3 text-xs font-medium tracking-wide text-neutral-500 uppercase dark:text-neutral-400',
                   column.align === 'right' ? 'text-right' : 'text-left',
                 )}
               >
@@ -22,9 +27,16 @@ export function Table({ columns, data, getRowKey = (row) => row.id, className })
             ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-neutral-100">
+        <tbody className="divide-y divide-neutral-100 dark:divide-neutral-700">
           {data.map((row) => (
-            <tr key={getRowKey(row)} className="transition-colors duration-150 hover:bg-neutral-50">
+            <tr
+              key={getRowKey(row)}
+              onClick={onRowClick ? () => onRowClick(row) : undefined}
+              className={cn(
+                'transition-colors duration-150 hover:bg-neutral-50 dark:hover:bg-neutral-700/50',
+                onRowClick && 'cursor-pointer',
+              )}
+            >
               {columns.map((column) => (
                 <td
                   key={column.key}

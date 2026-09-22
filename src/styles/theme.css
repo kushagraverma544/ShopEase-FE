@@ -6,6 +6,15 @@
   utility classes (or the `var(--token)` / `(--token)` arbitrary-value syntax).
 */
 
+/*
+  Opts into class-based dark mode (a `dark` class on an ancestor) instead of
+  Tailwind's default `prefers-color-scheme` media query — needed so the Admin
+  Console's manual theme toggle can drive it, independent of OS preference.
+  Only AdminLayout ever applies the `dark` class today, so `dark:` utilities
+  elsewhere in the app stay inert.
+*/
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   /* ---- Brand / primary (buttons, links, active nav) ---- */
   --color-primary-50: #eef2ff;
@@ -26,6 +35,21 @@
   --color-accent-500: #f97316;
   --color-accent-600: #ea580c;
   --color-accent-700: #c2410c;
+
+  /* ---- Navy (Admin Console sidebar chrome only — fixed, not theme-toggled).
+     navy-900 is the requested #010736 anchor; 800/700 are lighter tints of
+     that same hue (blended toward white), not independently chosen. ---- */
+  --color-navy-900: #010736;
+  --color-navy-800: #1f254e;
+  --color-navy-700: #363c6b;
+
+  /* ---- Blue (true royal blue, not the primary indigo/violet — Admin
+     sidebar gradient top only, where "blue" specifically was asked for).
+     blue-600 is the requested #1B2CC1 anchor; 500/300 are lighter tints of
+     that same hue (blended toward white), not independently chosen. ---- */
+  --color-blue-300: #98a0e3;
+  --color-blue-500: #4956cd;
+  --color-blue-600: #1b2cc1;
 
   /* ---- Neutral (text, borders, surfaces) ---- */
   --color-neutral-0: #ffffff;
@@ -84,7 +108,7 @@
 :root {
   --header-height: 5rem;
   --sidebar-width-collapsed: 4.5rem;
-  --sidebar-width-expanded: 16rem;
+  --sidebar-width-expanded: 18rem;
   --sidebar-transition-duration: 200ms;
   --sidebar-transition-ease: ease;
 
